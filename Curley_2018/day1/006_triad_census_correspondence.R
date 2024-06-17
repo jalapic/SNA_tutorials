@@ -2,7 +2,7 @@
 
 # example....
 
-tri_mats <- readRDS('data/tri_mats.rds')
+tri_mats <- readRDS('Curley_2018/data/tri_mats.rds')
 
 tri_mats
 str(tri_mats)
