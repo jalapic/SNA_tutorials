@@ -1,3 +1,5 @@
+### CALCULATE TRANSITIVITY EXERCISE
+
 
 #' Create a dataset of interactions (2 columns) where the first column is actor and second recipient. 
 #' This should be 200 rows. 
