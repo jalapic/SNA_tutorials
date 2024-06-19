@@ -84,6 +84,7 @@ mean(paths[upper.tri(paths)], na.rm=T)
 
 # DOES NOT WORK AS EXPECTED, IS SUPPOSED TO PRODUCE THE SAME RESULT AS ABOVE
 mean_distance(g)
+?mean_distance()
 
 comps=decompose(g)
 comps # a list object consisting of each component as graph object
