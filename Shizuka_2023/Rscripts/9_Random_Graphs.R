@@ -21,7 +21,7 @@ plot(g2,layout=layout.circle)
 densities=vector(length=100) #set up empty vector 
 for (i in 1:100){
   r=erdos.renyi.game(20,0.2,type="gnp") #random graph
-  densities[i]=graph.density(r) #store the density of random graph as the ith element of the vector
+  densities[i]=edge_density(r) #store the density of random graph as the ith element of the vector
 }
 densities #print the resulting vector mean(densities) #calculate the mean density
 
