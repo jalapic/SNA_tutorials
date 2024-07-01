@@ -8,13 +8,20 @@
 library(igraph)
 # just the actors and recipients: c7[, c("vector1","vector2")] 
 library(hierformR)
+library(network) 
+library(sna)
+library(ggraph)
+library(visNetwork)
+library(threejs)
+library(networkD3)
+library(ndtv)
+library(tidyverse)
 
 # transitive: 030T [9]
 # on its way to being transitive: 021U [5] and 021D [4]
 # intransitive: 030C [10]
 
 # import
-library(tidyverse)
 c1 <- read_csv("rfid_data/cohort1.csv",
                col_types = cols(vector1 = col_character(), 
                                 vector2 = col_character()))
@@ -58,7 +65,7 @@ c9 <- c9 %>% arrange(value1)
 c10 <- c10 %>% arrange(value1)
 
 
-cohort <- c7
+cohort <- c1
 
 
 
@@ -75,17 +82,59 @@ last_cohort <- lastints(cohort[, 4:5])
 
 
 
+
 plot_cohort <- list()
 # last_cohort[[i]][, c("vector1","vector2")]
 for (i in 1:length(last_cohort)) {
   plot(graph_from_edgelist(as.matrix(last_cohort[[i]]), directed = TRUE), layout = l, edge.curved = 0)
 }
-
+plot(graph_from_edgelist(as.matrix(last_cohort[[length(last_cohort)]]), directed = TRUE), layout = l, edge.curved = 0)
 rolling = list()
 for (m in 1:length(last_cohort)) {
   rolling[[m]] = triad_census(graph_from_edgelist(as.matrix(last_cohort[[m]][, c("vector1","vector2")]), directed = TRUE))
 }
 rolling[[length(last_cohort)]]
+
+par(mfrow=c(2,2), mar=c(0,0,0,0)) # plot four figures - 2 rows, 2 columns
+plot(graph_from_edgelist(as.matrix(last_cohort[[round(0.25 * length(last_cohort))]]), directed = TRUE), layout = l, edge.curved = 0)
+plot(graph_from_edgelist(as.matrix(last_cohort[[round(0.5 * length(last_cohort))]]), directed = TRUE), layout = l, edge.curved = 0)
+plot(graph_from_edgelist(as.matrix(last_cohort[[round(0.75 * length(last_cohort))]]), directed = TRUE), layout = l, edge.curved = 0)
+plot(graph_from_edgelist(as.matrix(last_cohort[[length(last_cohort)]]), directed = TRUE), layout = l, edge.curved = 0)
+
+
+
+
+
+# adjust the number so it plots it for [[4]], [[5]], and [[9]]
+state <- 5 # the descending number of triad_census code
+
+rolling_g = list() #empty list to store the new dataframes
+
+# iterate through each row and create new df with each new one added
+for (j in 1:(length(last_cohort))) {
+  rolling_g[[j]] = last_cohort[[j]]
+}
+
+rolling_plots = list()
+for (k in 1:(length(rolling_g))) {
+  rolling_plots[[k]] = graph_from_edgelist(as.matrix(last_cohort[[k]]), directed = TRUE)
+}
+
+rolling_census = list()
+for (m in 1:(length(rolling_g))) {
+  rolling_census[[m]] = triad_census(rolling_plots[[m]])[state]/sum(triad_census(rolling_plots[[m]]))
+}
+
+time_vs_census <- data.frame(
+  timeline = c(1:length(rolling_census)),
+  census = unlist(rolling_census))
+
+ggplot(time_vs_census, aes(timeline, census)) + geom_line() + xlab("Interaction") +
+  ylab("Triad Census") + ggtitle("Rolling Triad")
+
+
+
+
 
 
 
