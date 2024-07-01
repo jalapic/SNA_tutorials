@@ -106,7 +106,7 @@ plot(graph_from_edgelist(as.matrix(last_cohort[[length(last_cohort)]]), directed
 
 
 # adjust the number so it plots it for [[4]], [[5]], and [[9]]
-state <- 5 # the descending number of triad_census code
+state <- 9 # the descending number of triad_census code
 
 rolling_g = list() #empty list to store the new dataframes
 
@@ -125,6 +125,12 @@ for (m in 1:(length(rolling_g))) {
   rolling_census[[m]] = triad_census(rolling_plots[[m]])[state]/sum(triad_census(rolling_plots[[m]]))
 }
 
+rolling_censusX = list()
+for (m in 1:(length(rolling_g))) {
+  rolling_censusX[[m]] = triad_census(rolling_plots[[m]])
+}
+
+
 time_vs_census <- data.frame(
   timeline = c(1:length(rolling_census)),
   census = unlist(rolling_census))
@@ -136,8 +142,7 @@ ggplot(time_vs_census, aes(timeline, census)) + geom_line() + xlab("Interaction"
 
 
 
+rolling_g
 
-
-
-
+rolling_plots
 
