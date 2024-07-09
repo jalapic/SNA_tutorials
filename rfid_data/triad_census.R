@@ -86,6 +86,7 @@ c9 <- cohort_lastints(c9)
 c10 <- cohort_lastints(c10)
 
 
+# creates a graph object for that cohort
 cohort_graph <- function(cohort = NULL) {
   graph_cohort <- list()
   for (i in 1:length(cohort)) {
@@ -95,18 +96,19 @@ cohort_graph <- function(cohort = NULL) {
 }
 
 
-set_layout <- function(cohort = NULL) {
-  g <- cohort_graph(cohort)[[length(cohort)]]
-  last <- cohort[[length(cohort)]]
-  l = layout_in_circle(g, order = sort(V(g)))
-  # plot(g, layout = l, edge.curved = 0)
-  return(l)
-}
+
+# set_layout <- function(cohort = NULL) {
+  # g <- cohort_graph(cohort)[[length(cohort)]]
+  # last <- cohort[[length(cohort)]]
+  # l = layout_in_circle(g, order = sort(V(g)))
+  # return(l)
+# }
 
 # plot(graph_from_edgelist(as.matrix(last_cohort[[length(last_cohort)]]), directed = TRUE), layout = l, edge.curved = 0)
 # rolling[[length(last_cohort)]]
 
 
+# gets the triad census state for what number of the column it's in
 triad_state <- function(state = NULL) {
   if (state == 1) {
     name = "003"
@@ -179,6 +181,7 @@ triad_state <- function(state = NULL) {
 # plot(graph_from_edgelist(as.matrix(cohort[[length(cohort)]]), directed = TRUE), layout = l, edge.curved = 0)
 
 
+# returns triad census for that cohort for every time
 rolling_cohort <- function(cohort = NULL) {
   rolling = list()
   rolling_graph <- cohort_graph(cohort)
@@ -191,6 +194,8 @@ rolling_cohort <- function(cohort = NULL) {
 # adjust the number so it plots it for [[4]], [[5]], and [[9]]
 # state <- 9 # the descending number of triad_census code
 
+
+# plots the proportion that a triad state appears across time for that cohort
 plot_triad <- function(cohort = NULL, state = NULL) {
   cohort_triad = rolling_cohort(cohort)
   g <- cohort_graph(cohort)
@@ -208,6 +213,7 @@ plot_triad <- function(cohort = NULL, state = NULL) {
 }
 
 
+# plots the change in proportion across time for 021D, 021U, and 030T
 plot_all <- function(cohort = NULL, cohort_number = NULL) {
   plot_4 <- plot_triad(cohort, 4) + ggtitle(paste0("Rolling Triad - Cohort ", cohort_number))
   plot_5 <- plot_triad(cohort, 5) + ggtitle(paste0("Rolling Triad - Cohort ", cohort_number))
@@ -216,6 +222,7 @@ plot_all <- function(cohort = NULL, cohort_number = NULL) {
 }
 
 
+# plots proportion of 021D, 021U, and 030T across time for all cohorts
 plot_all(c1, 1)
 plot_all(c2, 2)
 plot_all(c3, 3)
@@ -228,16 +235,66 @@ plot_all(c9, 9)
 plot_all(c10, 10)
 
 
-
-
-
-
 # rolling_censusX = list()
 # for (m in 1:(length(rolling_g))) {
 #   rolling_censusX[[m]] = triad_census(rolling_plots[[m]])
 # }
 
+new_combn <- function(cohort = NULL, group_size = NULL){
+  individuals <- unique(unlist(cohort[length(cohort)], use.names = FALSE))
+  all_combos <- combn(individuals, group_size, simplify = FALSE)
+  return(all_combos)
+}
 
+
+# input: cohort name, triad id number, time
+# returns the triad, an igraph object of the triad at that point of time, and the triad census
+triad_sub_time <- function(cohort = NULL, triad = NULL, time = NULL) {
+  g = cohort_graph(cohort)
+  ids <- new_combn(cohort, 3)
+  sg = NA
+  sg_census = NA
+  try(sg <- induced_subgraph(g[[time]], vids = ids[triad][[1]]), silent = TRUE)
+  try(sg_census <- triad_census(sg), silent = TRUE)
+  return(list(ids[[triad]], sg, sg_census))
+}
+
+
+# input: cohort name, triad id number
+# returns as a list: the triad, igraph objects of the triad, and the triad censuses
+# different from triad_sub_time because it shows for all interactions
+triad_sub_all <- function(cohort = NULL, triad = NULL) {
+  g = cohort_graph(cohort)
+  ids <- new_combn(cohort, 3)
+  sg = rep(list(NA),length(cohort))
+  sg_census = rep(list(NA),length(cohort))
+  for (i in 1:length(cohort)){
+    try(sg[[i]] <- induced_subgraph(g[[i]], vids = ids[triad][[1]]), silent = TRUE)
+    try(sg_census[[i]] <- triad_census(sg[[i]]), silent = TRUE)
+  }
+  return(list(ids[[triad]], sg, sg_census))
+}
+
+
+
+
+# WIP for recording changes between igraph objects
+# figure out how to compare igraph objects? != doesnt work
+# it's supposed to look at the igraph for each interaction and record it in a
+# new list if it's different from the previous interaction
+triad_changes <- function(cohort = NULL, triad = NULL) {
+  changes = NULL
+  data = triad_sub_all(cohort, triad)
+  most_recent = 0
+  count = 1
+  for (i in 1:10) {
+    if (most_recent != data[[2]][[i]]) {
+      changes[count] <- data[[2]][[i]]
+      count <- count + 1
+    }
+  }
+  return(changes)
+}
 
 
 
