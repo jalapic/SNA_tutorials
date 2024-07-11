@@ -72,6 +72,28 @@ cohort_lastints <- function(cohort = NULL) {
   return(last_cohort)
 }
 
+# makes all cohorts just the times
+c1_time <- as.matrix(c1[, 2:3], dimnames = c("Enter_Time", "Exit_Time"))
+colnames(c1_time) <- c("Enter_Time", "Exit_Time")
+c2_time <- c2[, 2:3]
+colnames(c2_time) <- c("Enter_Time", "Exit_Time")
+c3_time <- c3[, 2:3]
+colnames(c3_time) <- c("Enter_Time", "Exit_Time")
+c4_time <- c4[, 2:3]
+colnames(c4_time) <- c("Enter_Time", "Exit_Time")
+c5_time <- c5[, 2:3]
+colnames(c5_time) <- c("Enter_Time", "Exit_Time")
+# c6_time <- c6[, 2:3]
+# colnames(c6_time) <- c("Enter_Time", "Exit_Time")
+c7_time <- c7[, 2:3]
+colnames(c7_time) <- c("Enter_Time", "Exit_Time")
+c8_time <- c8[, 2:3]
+colnames(c8_time) <- c("Enter_Time", "Exit_Time")
+c9_time <- c9[, 2:3]
+colnames(c9_time) <- c("Enter_Time", "Exit_Time")
+c10_time <- c10[, 2:3]
+colnames(c10_time) <- c("Enter_Time", "Exit_Time")
+
 
 # makes all cohorts just the last interactions
 c1 <- cohort_lastints(c1)
@@ -86,7 +108,14 @@ c9 <- cohort_lastints(c9)
 c10 <- cohort_lastints(c10)
 
 
-# creates a graph object for that cohort
+
+
+
+
+
+
+
+# creates a igraph object for that cohort
 cohort_graph <- function(cohort = NULL) {
   graph_cohort <- list()
   for (i in 1:length(cohort)) {
@@ -108,77 +137,79 @@ cohort_graph <- function(cohort = NULL) {
 # rolling[[length(last_cohort)]]
 
 
+
 # gets the triad census state for what number of the column it's in
 triad_state <- function(state = NULL) {
+  name = NULL
+  trans = NULL
   if (state == 1) {
     name = "003"
+    trans = NA
   }
   if (state == 2) {
     name = "012"
+    trans = NA
   }
   if (state == 3) {
     name = "102"
+    trans = NA
   }
   if (state == 4) {
     name = "021D"
+    trans = NA
   }
   if (state == 5) {
     name = "021U"
+    trans = NA
   }
   if (state == 6) {
     name = "021C"
+    trans = "Intransitive"
   }
   if (state == 7) {
     name = "111D"
+    trans = "Intransitive"
   }
   if (state == 8) {
     name = "111U"
+    trans = "Intransitive"
   }
   if (state == 9) {
     name = "030T"
+    trans = "Transitive"
   }
   if (state == 10) {
     name = "030C"
+    trans = "Intransitive"
   }
   if (state == 11) {
     name = "201"
+    trans = "Intransitive"
   }
   if (state == 12) {
     name = "120D"
+    trans = "Transitive"
   }
   if (state == 13) {
     name = "120U"
+    trans = "Transitive"
   }
   if (state == 14) {
     name = "120C"
+    trans = "Mixed"
   }
   if (state == 15) {
     name = "210"
+    trans = "Mixed"
   }
   if (state == 16) {
     name = "300"
+    trans = "Transitive"
   }
-  return(name)
+  return(list(name, trans))
 }
 
 
-
-
-
-# layout is still not sorting in order :(
-# par(mfrow=c(2,2), mar=c(0,0,0,0)) # plot four figures - 2 rows, 2 columns
-# plot_four <- function(cohort = NULL) {
-  # g <- cohort_graph(cohort)
-  # plot(g[[round(0.25 * length(cohort))]], layout = l, edge.curved = 0)
-  # plot(g[[round(0.50 * length(cohort))]], layout = l, edge.curved = 0)
-  # plot(g[[round(0.75 * length(cohort))]], layout = l, edge.curved = 0)
-  # plot(g[[length(cohort)]], layout = l, edge.curved = 0)
-# }
-
-# plot(graph_from_edgelist(as.matrix(cohort[[round(0.25 * length(cohort))]]), directed = TRUE), layout = l, edge.curved = 0)
-# plot(graph_from_edgelist(as.matrix(cohort[[round(0.5 * length(cohort))]]), directed = TRUE), layout = l, edge.curved = 0)
-# plot(graph_from_edgelist(as.matrix(cohort[[round(0.75 * length(cohort))]]), directed = TRUE), layout = l, edge.curved = 0)
-# plot(graph_from_edgelist(as.matrix(cohort[[length(cohort)]]), directed = TRUE), layout = l, edge.curved = 0)
 
 
 # returns triad census for that cohort for every time
@@ -190,9 +221,6 @@ rolling_cohort <- function(cohort = NULL) {
   }
   return(rolling)
 }
-
-# adjust the number so it plots it for [[4]], [[5]], and [[9]]
-# state <- 9 # the descending number of triad_census code
 
 
 # plots the proportion that a triad state appears across time for that cohort
@@ -208,7 +236,7 @@ plot_triad <- function(cohort = NULL, state = NULL) {
     census = unlist(rolling_census))
   
   new_plot <- ggplot(time_vs_census, aes(timeline, census)) + geom_line() + xlab("Interaction") +
-    ylab(paste0("Triad Census: ", triad_state(state)))
+    ylab(paste0("Triad Census: ", triad_state(state)[1]))
   return(new_plot)
 }
 
@@ -277,19 +305,182 @@ triad_sub_all <- function(cohort = NULL, triad = NULL) {
 
 
 
+# returns a list of the number of edges for each time
+triad_edge_count <- function(cohort = NULL, triad = NULL) {
+  data <- triad_sub_all(cohort, triad)
+  e <- rep(list(NA),length(cohort))
+  for (i in 1:length(cohort)) {
+    try(e[[i]] <- gsize(data[[2]][[i]]), silent = TRUE)
+  }
+  return(e)
+}
+
+
+# returns the id for each state at every time
+triad_state_trans <- function(cohort = NULL, triad = NULL) {
+  data <- triad_sub_all(cohort, triad)
+  state <- rep(list(NA),length(cohort))
+  trans <- rep(list(NA),length(cohort))
+  for (i in 1:length(cohort)) {
+    for (j in 1:10) {
+      try(if (data[[3]][[i]][[j]] == 1) {
+        state[[i]] = triad_state(j)[[1]]
+      }, silent = TRUE)
+      try(if (data[[3]][[i]][[j]] == 1) {
+        trans[[i]] = triad_state(j)[[2]]
+      }, silent = TRUE)
+    }
+  }
+  return(list(state, trans))
+}
+
+
+# returns the timecodes based on the cohort number
+cohort_time <- function(cohort_number = NULL) {
+  time = NULL
+  if (cohort_number == 1) {
+    time = c1_time
+  }
+  if (cohort_number == 2) {
+    time = c2_time
+  }
+  if (cohort_number == 3) {
+    time = c3_time
+  }
+  if (cohort_number == 4) {
+    time = c4_time
+  }
+  if (cohort_number == 5) {
+    time = c5_time
+  }
+  if (cohort_number == 6) {
+    time = c6_time
+  }
+  if (cohort_number == 7) {
+    time = c7_time
+  }
+  if (cohort_number == 8) {
+    time = c8_time
+  }
+  if (cohort_number == 9) {
+    time = c9_time
+  }
+  if (cohort_number == 10) {
+    time = c10_time
+  }
+  return(time)
+}
+
+
+# creates a new matrix for subtriad that includes the times, igraph objects,
+# triad census, number of edges, the state id, and transitivity
+triad_matrix <- function(cohort_number = NULL, cohort = NULL, triad = NULL) {
+  tri_mat <- as.matrix(triad_sub_all(cohort, triad)[[2]]) # igraph
+  tri_mat <- cbind(tri_mat, as.matrix(triad_sub_all(cohort, triad)[[3]])) # triad census
+  tri_mat <- cbind(cohort_time(cohort_number), tri_mat) # timecodes
+  tri_mat <- cbind(tri_mat, as.matrix(triad_edge_count(cohort, triad))) # edge count
+  tri_mat <- cbind(tri_mat, as.matrix(triad_state_trans(cohort, triad)[[1]])) # triad state
+  tri_mat <- cbind(tri_mat, as.matrix(triad_state_trans(cohort, triad)[[2]])) # transitive or intransitive
+  colnames(tri_mat) <- c("Enter_Time", "Exit_Time", "IGraph", "Triad_Census", "Edge_Count", "ID", "Transitivity")
+  return(tri_mat) # it's going to give an error message, but it still works if you assign it to a name
+}
+
+
+edge_count <- function(cohort = NULL) {
+  data = cohort_graph(cohort)
+  e <- rep(list(NA),length(cohort))
+  for (i in 1:length(cohort)) {
+    try(e[[i]] <- gsize(data[[i]]), silent = TRUE)
+  }
+  return(e)
+}
+
+
+
+
+
+
+# WIP - find a way to return how many of each state
+state_trans <- function(cohort = NULL) {
+  indiv <- length(unique(unlist(cohort[length(cohort)], use.names = FALSE)))
+  combination <- factorial(indiv) / ((factorial(3) * (factorial(indiv - 3))))
+  all_state = rep(list(NA),length(cohort))
+  
+
+  return
+}
+  
+
+
+
+# for (i in 1:combination) {
+  # s_t <- triad_state_trans(cohort, i)
+  # for (j in 1:length(s_t[[1]])) {
+  # }
+# }
+
+
+
+# WIP - add state and transitivity
+# shows as a matrix the entire cohort's data
+all_matrix <- function(cohort_number = NULL, cohort = NULL) {
+  data = cohort_graph(cohort)
+  triad = NULL
+  for (i in 1:length(cohort)) {
+    triad[[i]] <- triad_census(data[[i]])
+  }
+  all_mat <- cohort_time(cohort_number) # timecodes
+  all_mat <- cbind(all_mat, as.matrix(data)) # igraph
+  all_mat <- cbind(all_mat, as.matrix(triad)) # triad census
+  all_mat <- cbind(all_mat, as.matrix(edge_count(cohort))) # edge count
+  colnames(all_mat) <- c("Enter_Time", "Exit_Time", "IGraph", "Triad_Census", "Edge_Count")
+  return(all_mat)
+}
+
+
+
+data = cohort_graph(c1)
+# ids <- unique(unlist(c1[length(c1)], use.names = FALSE))
+# g = rep(list(NA), length(c1))
+# for (i in 1:length(c1)){
+  # try(g[[i]] <- induced_subgraph(data[[i]], vids = ids), silent = TRUE)
+# }
+triad = NULL
+for (i in 1:length(c1)) {
+  triad[[i]] <- triad_census(data[[i]])
+}
+all_mat <- as.matrix(cohort_time(1)) # timecodes
+all_mat <- cbind(all_mat, as.matrix(data)) # igraph
+all_mat <- cbind(all_mat, as.matrix(triad)) # triad census
+all_mat <- cbind(all_mat, as.matrix(edge_count(c1))) # edge count
+return(all_mat)
+
+
+
+
+
+
+
+
+
 
 # WIP for recording changes between igraph objects
 # figure out how to compare igraph objects? != doesnt work
 # it's supposed to look at the igraph for each interaction and record it in a
 # new list if it's different from the previous interaction
-triad_changes <- function(cohort = NULL, triad = NULL) {
-  changes = NULL
-  data = triad_sub_all(cohort, triad)
+triad_changes <- function(cohort_number = NULL, cohort = NULL, triad = NULL) {
+  changes = "NULL"
+  data = triad_matrix(cohort_number, cohort, triad)
   most_recent = 0
   count = 1
+  attempt = 1
+  while (most_recent == 0) {
+    try(most_recent <- data[[attempt,3]])
+    attempt = attempt + 1
+  }
   for (i in 1:10) {
-    if (most_recent != data[[2]][[i]]) {
-      changes[count] <- data[[2]][[i]]
+    if (!(identical_graphs(most_recent, data[[i,3]]))) {
+      changes[count] <- data[[i,]]
       count <- count + 1
     }
   }
@@ -297,6 +488,22 @@ triad_changes <- function(cohort = NULL, triad = NULL) {
 }
 
 
+
+changes = "NULL"
+data = triad_matrix(1, c1, 1)
+most_recent = 0
+count = 1
+attempt = 1
+while (is.na(data[[attempt,3]]) == TRUE) {
+  attempt = attempt + 1
+}
+most_recent <- data[[attempt,3]]
+for (i in 1:10) {
+  if (!(identical_graphs(most_recent, data[[i,3]]))) {
+    changes[count] <- data[[i,]]
+    count <- count + 1
+  }
+}
 
 
 
