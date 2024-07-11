@@ -287,6 +287,8 @@ triad_sub_time <- function(cohort = NULL, triad = NULL, time = NULL) {
   return(list(ids[[triad]], sg, sg_census))
 }
 
+triad_sub_time(cohort = c10, triad = 4, time = 888)
+
 
 # input: cohort name, triad id number
 # returns as a list: the triad, igraph objects of the triad, and the triad censuses
@@ -304,6 +306,9 @@ triad_sub_all <- function(cohort = NULL, triad = NULL) {
 }
 
 
+triad_sub_all(cohort = c10, triad = 4)
+
+
 
 # returns a list of the number of edges for each time
 triad_edge_count <- function(cohort = NULL, triad = NULL) {
@@ -314,6 +319,54 @@ triad_edge_count <- function(cohort = NULL, triad = NULL) {
   }
   return(e)
 }
+
+triad_edge_count(cohort = c10, triad = 4)
+unlist(triad_edge_count(cohort = c10, triad = 4))
+unlist(triad_edge_count(cohort = c10, triad = 17))
+
+triad_ids <- new_combn(c10, 3)
+triad_ids[[4]]
+triad_ids[[17]]
+
+
+###  using best order to look how quickly edges are resolved in networks by dominance.
+
+# how long does it take to get to 3 edges.
+outres <- NULL
+for(i in 1:length(triad_ids)){
+outres[[i]] <- which(unlist(triad_edge_count(cohort = c10, triad = i))==3)[1]
+}
+unlist(outres)
+
+edge3.df <- data.frame(id = unlist(triad_ids),
+           time = rep(unlist(outres), each = 3)
+           )
+
+edge3.df$rank <- match(edge3.df$id, besto)
+head(edge3.df)
+
+# average time for each triad to complete by rank
+edge3.df %>%
+  group_by(rank,id) %>%
+  summarize(time = mean(time)) %>%
+  as.data.frame()
+
+# last time for all triads to complete by rank
+edge3.df %>%
+  group_by(rank,id) %>%
+  summarize(time = max(time)) %>%
+  as.data.frame()
+
+
+# determine how quickly each finishes their first, second,... etc. triad
+
+edge3.df %>%
+  group_by(id, rank) %>%
+  arrange(rank,time) %>%
+  mutate(triadno = row_number(),
+         cohort= "c10") %>%
+  as.data.frame()
+
 
 
 # returns the id for each state at every time
@@ -333,6 +386,9 @@ triad_state_trans <- function(cohort = NULL, triad = NULL) {
   }
   return(list(state, trans))
 }
+
+triad_state_trans(cohort = c10, triad = 4)
+triad_state_trans(cohort = c7, triad = 12)
 
 
 # returns the timecodes based on the cohort number
@@ -384,6 +440,15 @@ triad_matrix <- function(cohort_number = NULL, cohort = NULL, triad = NULL) {
   colnames(tri_mat) <- c("Enter_Time", "Exit_Time", "IGraph", "Triad_Census", "Edge_Count", "ID", "Transitivity")
   return(tri_mat) # it's going to give an error message, but it still works if you assign it to a name
 }
+
+## as.numeric(gsub("c","","c10"))
+## as.numeric(gsub("\\D","","c10"))
+
+
+tmat.c10 <- triad_matrix(cohort_number = 10, cohort = c10, triad = 4)
+
+
+tmat.c10[60,3]
 
 
 edge_count <- function(cohort = NULL) {
