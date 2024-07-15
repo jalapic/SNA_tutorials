@@ -16,6 +16,7 @@ library(threejs)
 library(networkD3)
 library(ndtv)
 library(tidyverse)
+library(compete)
 
 # transitive: 030T [9]
 # on its way to being transitive: 021U [5] and 021D [4]
@@ -53,16 +54,16 @@ c10 <- read_csv("rfid_data/cohort10.csv",
                 col_types = cols(vector1 = col_character(), 
                                  vector2 = col_character()))
 #make sure data is ordered by time (value 1 column)
-c1 <- c1 %>% arrange(value1)
-c2 <- c2 %>% arrange(value1)
-c3 <- c3 %>% arrange(value1)
-c4 <- c4 %>% arrange(value1)
-c5 <- c5 %>% arrange(value1)
-# c6 <- c6 %>% arrange(value1)
-c7 <- c7 %>% arrange(value1)
-c8 <- c8 %>% arrange(value1)
-c9 <- c9 %>% arrange(value1)
-c10 <- c10 %>% arrange(value1)
+c1_og <- c1 %>% arrange(value1)
+c2_og <- c2 %>% arrange(value1)
+c3_og <- c3 %>% arrange(value1)
+c4_og <- c4 %>% arrange(value1)
+c5_og <- c5 %>% arrange(value1)
+# c6_og <- c6 %>% arrange(value1)
+c7_og <- c7 %>% arrange(value1)
+c8_og <- c8 %>% arrange(value1)
+c9_og <- c9 %>% arrange(value1)
+c10_og <- c10 %>% arrange(value1)
 
 cohort_lastints <- function(cohort = NULL) {
   last_cohort <- lastints(cohort[, 4:5])
@@ -73,46 +74,46 @@ cohort_lastints <- function(cohort = NULL) {
 }
 
 # makes all cohorts just the times
-c1_time <- as.matrix(c1[, 2:3], dimnames = c("Enter_Time", "Exit_Time"))
-colnames(c1_time) <- c("Enter_Time", "Exit_Time")
-c2_time <- c2[, 2:3]
-colnames(c2_time) <- c("Enter_Time", "Exit_Time")
-c3_time <- c3[, 2:3]
-colnames(c3_time) <- c("Enter_Time", "Exit_Time")
-c4_time <- c4[, 2:3]
-colnames(c4_time) <- c("Enter_Time", "Exit_Time")
-c5_time <- c5[, 2:3]
-colnames(c5_time) <- c("Enter_Time", "Exit_Time")
-# c6_time <- c6[, 2:3]
-# colnames(c6_time) <- c("Enter_Time", "Exit_Time")
-c7_time <- c7[, 2:3]
-colnames(c7_time) <- c("Enter_Time", "Exit_Time")
-c8_time <- c8[, 2:3]
-colnames(c8_time) <- c("Enter_Time", "Exit_Time")
-c9_time <- c9[, 2:3]
-colnames(c9_time) <- c("Enter_Time", "Exit_Time")
-c10_time <- c10[, 2:3]
-colnames(c10_time) <- c("Enter_Time", "Exit_Time")
+# c1_time <- as.matrix(c1[, 2:3], dimnames = c("Enter_Time", "Exit_Time"))
+# colnames(c1_time) <- c("Enter_Time", "Exit_Time")
+# c2_time <- c2[, 2:3]
+# colnames(c2_time) <- c("Enter_Time", "Exit_Time")
+# c3_time <- c3[, 2:3]
+# colnames(c3_time) <- c("Enter_Time", "Exit_Time")
+# c4_time <- c4[, 2:3]
+# colnames(c4_time) <- c("Enter_Time", "Exit_Time")
+# c5_time <- c5[, 2:3]
+# colnames(c5_time) <- c("Enter_Time", "Exit_Time")
+# # c6_time <- c6[, 2:3]
+# # colnames(c6_time) <- c("Enter_Time", "Exit_Time")
+# c7_time <- c7[, 2:3]
+# colnames(c7_time) <- c("Enter_Time", "Exit_Time")
+# c8_time <- c8[, 2:3]
+# colnames(c8_time) <- c("Enter_Time", "Exit_Time")
+# c9_time <- c9[, 2:3]
+# colnames(c9_time) <- c("Enter_Time", "Exit_Time")
+# c10_time <- c10[, 2:3]
+# colnames(c10_time) <- c("Enter_Time", "Exit_Time")
 
 
 # makes all cohorts just the last interactions
-c1 <- cohort_lastints(c1)
-c2 <- cohort_lastints(c2)
-c3 <- cohort_lastints(c3)
-c4 <- cohort_lastints(c4)
-c5 <- cohort_lastints(c5)
-# c6 <- cohort_lastints(c6)
-c7 <- cohort_lastints(c7)
-c8 <- cohort_lastints(c8)
-c9 <- cohort_lastints(c9)
-c10 <- cohort_lastints(c10)
+c1 <- cohort_lastints(c1_og)
+c2 <- cohort_lastints(c2_og)
+c3 <- cohort_lastints(c3_og)
+c4 <- cohort_lastints(c4_og)
+c5 <- cohort_lastints(c5_og)
+# c6 <- cohort_lastints(c6_og)
+c7 <- cohort_lastints(c7_og)
+c8 <- cohort_lastints(c8_og)
+c9 <- cohort_lastints(c9_og)
+c10 <- cohort_lastints(c10_og)
 
 
-
-
-
-
-
+best_order <- function(cohort_og = NULL) {
+  mat <- get_wl_matrix(as.data.frame(cohort_og[,4:5]))
+  besto <- isi13(mat)$best_order
+  return(besto)
+}
 
 
 # creates a igraph object for that cohort
@@ -287,7 +288,7 @@ triad_sub_time <- function(cohort = NULL, triad = NULL, time = NULL) {
   return(list(ids[[triad]], sg, sg_census))
 }
 
-triad_sub_time(cohort = c10, triad = 4, time = 888)
+# example: triad_sub_time(cohort = c10, triad = 4, time = 888)
 
 
 # input: cohort name, triad id number
@@ -306,7 +307,7 @@ triad_sub_all <- function(cohort = NULL, triad = NULL) {
 }
 
 
-triad_sub_all(cohort = c10, triad = 4)
+# example: triad_sub_all(cohort = c10, triad = 4)
 
 
 
@@ -320,52 +321,7 @@ triad_edge_count <- function(cohort = NULL, triad = NULL) {
   return(e)
 }
 
-triad_edge_count(cohort = c10, triad = 4)
-unlist(triad_edge_count(cohort = c10, triad = 4))
-unlist(triad_edge_count(cohort = c10, triad = 17))
 
-triad_ids <- new_combn(c10, 3)
-triad_ids[[4]]
-triad_ids[[17]]
-
-
-###  using best order to look how quickly edges are resolved in networks by dominance.
-
-# how long does it take to get to 3 edges.
-outres <- NULL
-for(i in 1:length(triad_ids)){
-outres[[i]] <- which(unlist(triad_edge_count(cohort = c10, triad = i))==3)[1]
-}
-unlist(outres)
-
-edge3.df <- data.frame(id = unlist(triad_ids),
-           time = rep(unlist(outres), each = 3)
-           )
-
-edge3.df$rank <- match(edge3.df$id, besto)
-head(edge3.df)
-
-# average time for each triad to complete by rank
-edge3.df %>%
-  group_by(rank,id) %>%
-  summarize(time = mean(time)) %>%
-  as.data.frame()
-
-# last time for all triads to complete by rank
-edge3.df %>%
-  group_by(rank,id) %>%
-  summarize(time = max(time)) %>%
-  as.data.frame()
-
-
-# determine how quickly each finishes their first, second,... etc. triad
-
-edge3.df %>%
-  group_by(id, rank) %>%
-  arrange(rank,time) %>%
-  mutate(triadno = row_number(),
-         cohort= "c10") %>%
-  as.data.frame()
 
 
 
@@ -387,42 +343,42 @@ triad_state_trans <- function(cohort = NULL, triad = NULL) {
   return(list(state, trans))
 }
 
-triad_state_trans(cohort = c10, triad = 4)
-triad_state_trans(cohort = c7, triad = 12)
+# triad_state_trans(cohort = c10, triad = 4)
+# triad_state_trans(cohort = c7, triad = 12)
 
 
 # returns the timecodes based on the cohort number
 cohort_time <- function(cohort_number = NULL) {
   time = NULL
   if (cohort_number == 1) {
-    time = c1_time
+    time = c1_og[, 2:3]
   }
   if (cohort_number == 2) {
-    time = c2_time
+    time = c2_og[, 2:3]
   }
   if (cohort_number == 3) {
-    time = c3_time
+    time = c3_og[, 2:3]
   }
   if (cohort_number == 4) {
-    time = c4_time
+    time = c4_og[, 2:3]
   }
   if (cohort_number == 5) {
-    time = c5_time
+    time = c5_og[, 2:3]
   }
   if (cohort_number == 6) {
-    time = c6_time
+    time = c6_og[, 2:3]
   }
   if (cohort_number == 7) {
-    time = c7_time
+    time = c7_og[, 2:3]
   }
   if (cohort_number == 8) {
-    time = c8_time
+    time = c8_og[, 2:3]
   }
   if (cohort_number == 9) {
-    time = c9_time
+    time = c9_og[, 2:3]
   }
   if (cohort_number == 10) {
-    time = c10_time
+    time = c10_og[, 2:3]
   }
   return(time)
 }
@@ -444,12 +400,129 @@ triad_matrix <- function(cohort_number = NULL, cohort = NULL, triad = NULL) {
 ## as.numeric(gsub("c","","c10"))
 ## as.numeric(gsub("\\D","","c10"))
 
+# Example: tmat.c10 <- triad_matrix(cohort_number = 10, cohort = c10, triad = 4)
+# Example: tmat.c10[60,3]
 
-tmat.c10 <- triad_matrix(cohort_number = 10, cohort = c10, triad = 4)
 
 
-tmat.c10[60,3]
+# returns the average time to complete triads for each vertex, the number of the
+# last interaction for each vertex, and the different times each vertex was completed
+triad_complete <- function(cohort = NULL, cohort_og = NULL) {
+  triad_ids <- new_combn(c1, 3)
+  outres <- NULL
+  besto <- best_order(c1_og)
+  for(i in 1:20){
+    outres[[i]] <- which(unlist(triad_edge_count(c1, i))==3)[1]
+  }
+  edge3.df <- data.frame(id = unlist(triad_ids),
+                         time = rep(unlist(outres), each = 3)
+  )
+  edge3.df$rank <- match(edge3.df$id, besto)
+  # head(edge3.df)
+  
+  # average time for each triad to complete by rank
+  avg_time <- edge3.df %>%
+    group_by(rank,id) %>%
+    summarize(time = mean(time)) %>%
+    as.data.frame()
+  
+  # last time for all triads to complete by rank
+  complete_time <- edge3.df %>%
+    group_by(rank,id) %>%
+    summarize(time = max(time)) %>%
+    as.data.frame()
+  
+  
+  # determine how quickly each finishes their first, second,... etc. triad
+  
+  quick <- edge3.df %>%
+    group_by(id, rank) %>%
+    arrange(rank,time) %>%
+    mutate(triadno = row_number()) %>%
+    as.data.frame()
+  
+  finish_time <- NULL
+  first = 1
+  last = 0
+  for (i in 1:length(quick$id)) {
+    if (quick$id[i] == quick$id[1]) {
+      last = last + 1
+    }
+  }
+  len = last
+  for (i in 1:max(quick$rank)) {
+    finish_time[[i]] <- quick[c(first:last),]
+    first = first + len
+    last = last + len
+  }
+  
+  return(list(avg_time, complete_time, finish_time))
+}
 
+# ex: triad_complete(c1, c1_og)
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Everything below is still work-in-progress
+
+
+# WIP for recording changes between igraph objects
+# figure out how to compare igraph objects? != doesnt work
+# it's supposed to look at the igraph for each interaction and record it in a
+# new list if it's different from the previous interaction
+triad_changes <- function(cohort_number = NULL, cohort = NULL, triad = NULL) {
+  changes = "NULL"
+  data = triad_matrix(cohort_number, cohort, triad)
+  most_recent = 0
+  count = 1
+  attempt = 1
+  while (most_recent == 0) {
+    try(most_recent <- data[[attempt,3]])
+    attempt = attempt + 1
+  }
+  for (i in 1:10) {
+    if (!(identical_graphs(most_recent, data[[i,3]]))) {
+      changes[count] <- data[[i,]]
+      count <- count + 1
+    }
+  }
+  return(changes)
+}
+
+
+
+data = triad_matrix(1, c1, 1)
+most_recent = 0
+attempt = 1
+while (is.na(data[[attempt,3]])[1] == TRUE) {
+  attempt = attempt + 1
+}
+most_recent <- data[[attempt,3]]
+changes <- attempt
+for (i in attempt:50) {
+  if (!(identical_graphs(most_recent, data[[i,3]]))) {
+    most_recent <- data[[i,3]]
+    changes <- append(changes, i)
+  }
+}
+
+
+
+
+if (!(identical_graphs(most_recent, data[[i,3]]))) {
+  changes[count] <- data[[i,]]
+  count <- count + 1
+}
 
 edge_count <- function(cohort = NULL) {
   data = cohort_graph(cohort)
@@ -459,10 +532,6 @@ edge_count <- function(cohort = NULL) {
   }
   return(e)
 }
-
-
-
-
 
 
 # WIP - find a way to return how many of each state
@@ -475,7 +544,6 @@ state_trans <- function(cohort = NULL) {
   return
 }
   
-
 
 
 # for (i in 1:combination) {
@@ -525,50 +593,6 @@ return(all_mat)
 
 
 
-
-
-
-
-# WIP for recording changes between igraph objects
-# figure out how to compare igraph objects? != doesnt work
-# it's supposed to look at the igraph for each interaction and record it in a
-# new list if it's different from the previous interaction
-triad_changes <- function(cohort_number = NULL, cohort = NULL, triad = NULL) {
-  changes = "NULL"
-  data = triad_matrix(cohort_number, cohort, triad)
-  most_recent = 0
-  count = 1
-  attempt = 1
-  while (most_recent == 0) {
-    try(most_recent <- data[[attempt,3]])
-    attempt = attempt + 1
-  }
-  for (i in 1:10) {
-    if (!(identical_graphs(most_recent, data[[i,3]]))) {
-      changes[count] <- data[[i,]]
-      count <- count + 1
-    }
-  }
-  return(changes)
-}
-
-
-
-changes = "NULL"
-data = triad_matrix(1, c1, 1)
-most_recent = 0
-count = 1
-attempt = 1
-while (is.na(data[[attempt,3]]) == TRUE) {
-  attempt = attempt + 1
-}
-most_recent <- data[[attempt,3]]
-for (i in 1:10) {
-  if (!(identical_graphs(most_recent, data[[i,3]]))) {
-    changes[count] <- data[[i,]]
-    count <- count + 1
-  }
-}
 
 
 
