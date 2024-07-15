@@ -461,11 +461,50 @@ triad_complete <- function(cohort = NULL, cohort_og = NULL) {
 
 # ex: triad_complete(c1, c1_og)
 
+out <- triad_complete(c1, c1_og)
+
+out
 
 
 
 
+### Checking if graphs are the same.
 
+out1<-triad_matrix(1, c1, 1)
+
+out1[40,3]
+out1[43,3]
+
+identical_graphs(out1[[40,3]],out1[[43,3]])
+
+V(out1[[40,3]])
+V(out1[[43,3]])
+
+E(out1[[40,3]])
+E(out1[[43,3]])
+
+E(out1[[40,3]])==E(out1[[43,3]])
+E(out1[[340,3]])==E(out1[[343,3]])
+
+
+E(out1[[340,3]])
+E(out1[[563,3]])
+
+E(out1[[340,3]])==E(out1[[563,3]])
+
+
+E(out1[[34,3]])
+E(out1[[563,3]])
+
+E(out1[[34,3]])==E(out1[[563,3]])
+
+sum((E(out1[[34,3]])==E(out1[[563,3]]))==FALSE) #whenever above 0, graphs are not identical.
+
+#
+out1[[343,3]]
+out1[[663,3]]
+
+E(out1[[343,3]])==E(out1[[663,3]])
 
 
 
