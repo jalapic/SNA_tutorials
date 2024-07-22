@@ -469,8 +469,8 @@ c10_complete <- triad_complete(c10, c10_og)
 
 # returns a matrix of each time a new interaction happened in the triad
 triad_changes <- function(cohort_number = NULL, cohort = NULL, triad = NULL) {
-  tri_ints = triad_lastints(c1, 1)
-  data = triad_matrix(1, c1, 1)
+  tri_ints = triad_lastints(cohort, triad)
+  data = triad_matrix(cohort_number, cohort, triad)
   most_recent = 0
   attempt = 1
   while (is.na(tri_ints[[attempt]][[1]]) == TRUE) {
@@ -478,7 +478,7 @@ triad_changes <- function(cohort_number = NULL, cohort = NULL, triad = NULL) {
   }
   most_recent <- tri_ints[[attempt]]
   changes <- attempt
-  for (i in attempt:length(c1)) {
+  for (i in attempt:length(cohort)) {
     if (!(identical(sort(most_recent[[1]]), sort(tri_ints[[i]][[1]])))) {
       if (!(identical(sort(most_recent[[2]]), sort(tri_ints[[i]][[2]])))) {
         most_recent <- tri_ints[[i]]
@@ -487,7 +487,36 @@ triad_changes <- function(cohort_number = NULL, cohort = NULL, triad = NULL) {
     }
   }
   new <- as.matrix(data[c(changes),])
+  new <- cbind(new, changes)
+  colnames(new) <- c("Triad", "Enter_Time", "Exit_Time", "IGraph", "Triad_Census", "Edge_Count", "ID", "Transitivity", "Interaction")
   return(new)
+}
+
+
+# returns all changes within triads for a cohort
+triad_changes_all <- function(cohort_number = NULL, cohort = NULL) {
+  # data = triad_matrix(cohort_number, cohort, triad_number)
+  all_changes = NULL
+  for (j in 1:20) {
+    tri_ints = triad_lastints(cohort, j)
+    most_recent = 0
+    attempt = 1
+    while (is.na(tri_ints[[attempt]][[1]]) == TRUE) {
+      attempt = attempt + 1
+    }
+    most_recent <- tri_ints[[attempt]]
+    changes <- attempt
+    for (i in attempt:length(cohort)) {
+      if (!(identical(sort(most_recent[[1]]), sort(tri_ints[[i]][[1]])))) {
+        if (!(identical(sort(most_recent[[2]]), sort(tri_ints[[i]][[2]])))) {
+          most_recent <- tri_ints[[i]]
+          changes <- append(changes, i)
+        }
+      }
+    }
+    all_changes[[j]] <- changes
+  }
+  return(all_changes)
 }
 
 
@@ -514,8 +543,18 @@ triad_changes <- function(cohort_number = NULL, cohort = NULL, triad = NULL) {
 
 
 
-
 # Everything below is still work-in-progress
+
+
+#shows where one triad causes more changes
+cohort_changes <- function(cohort_number = NULL, cohort = NULL) {
+  changes <- triad_changes_all(cohort_number, cohort)
+  
+  
+}
+
+
+
 
 
 edge_count <- function(cohort = NULL) {
