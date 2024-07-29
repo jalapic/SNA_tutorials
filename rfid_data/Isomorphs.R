@@ -93,21 +93,154 @@ for (i in 1:length(sorted_combos)) {
   }
 }
 
-# shows the different types of isographs and how many there are of each
+# shows the different types of isomorphs and how many there are of each
 new_mat <- matrix(iso)
 new_mat <- cbind(new_mat, iso_count)
 
 
+# par(mfrow=c(1,1), mar=c(1,1,1,1))
 iso_graph <- list()
 for (i in 1:length(iso)) {
   m <- matrix(all_graphs[[iso_ex_num[i]]], nrow = nodes)
   iso_graph[[i]] <-graph_from_adjacency_matrix(m, mode="directed")
-  plot(iso_graph[[i]], layout = layout_in_circle(iso_graph[[1]]))
 }
 
 new_mat <- cbind(new_mat, iso_graph)
 colnames(new_mat) <- c("ID", "Count", "Example IGraph")
 # there are 22 total isomorphs
+
+
+par(mfrow=c(5,5), mar=c(0,0,1,0))
+for (i in 1:length(iso)) {
+  plot(iso_graph[[i]], layout = layout_in_circle(iso_graph[[1]]), vertex.color = "#80b2d7",
+       vertex.size = 25, vertex.frame.color = "#003a67", vertex.frame.width = 1.25,
+       edge.color = "black", edge.arrow.size = .2, vertex.label = NA, main = "Name Goes Here")
+}
+
+
+
+# gets the triad census state and id
+# accepts triad census
+triad_state <- function(census = NULL) {
+  name = NULL
+  trans = NULL
+  if (census[1] == 1) {
+    name = "003"
+    trans = NA
+  }
+  if (census[2] == 1) {
+    name = "012"
+    trans = NA
+  }
+  if (census[3] == 1) {
+    name = "102"
+    trans = NA
+  }
+  if (census[4] == 1) {
+    name = "021D"
+    trans = NA
+  }
+  if (census[5] == 1) {
+    name = "021U"
+    trans = NA
+  }
+  if (census[6] == 1) {
+    name = "021C"
+    trans = "Intransitive"
+  }
+  if (census[7] == 1) {
+    name = "111D"
+    trans = "Intransitive"
+  }
+  if (census[8] == 1) {
+    name = "111U"
+    trans = "Intransitive"
+  }
+  if (census[9] == 1) {
+    name = "030T"
+    trans = "Transitive"
+  }
+  if (census[10] == 1) {
+    name = "030C"
+    trans = "Intransitive"
+  }
+  if (census[11] == 1) {
+    name = "201"
+    trans = "Intransitive"
+  }
+  if (census[12] == 1) {
+    name = "120D"
+    trans = "Transitive"
+  }
+  if (census[13] == 1) {
+    name = "120U"
+    trans = "Transitive"
+  }
+  if (census[14] == 1) {
+    name = "120C"
+    trans = "Mixed"
+  }
+  if (census[15] == 1) {
+    name = "210"
+    trans = "Mixed"
+  }
+  if (census[16] == 1) {
+    name = "300"
+    trans = "Transitive"
+  }
+  return(list(name, trans))
+}
+
+
+
+iso_triad <- function(iso_number = NULL) {
+  g = new_mat[[iso_number, 3]]
+  individuals <- c(1, 2, 3, 4, 5, 6)
+  ids <- combn(individuals, 3, simplify = FALSE)
+  sg = rep(list(NA),length(ids))
+  sg_census = rep(list(NA),length(ids))
+  state <- rep(list(NA),length(ids))
+  trans <- rep(list(NA),length(ids))
+  for (i in 1:length(ids)){
+    sg[[i]] <- induced_subgraph(g, vids = ids[i][[1]])
+    sg_census[[i]] <- triad_census(sg[[i]])
+    state[[i]] <- triad_state(sg_census[[i]])[[1]]
+    trans[[i]] <- triad_state(sg_census[[i]])[[2]]
+  }
+  sub_mat <- matrix(ids)
+  sub_mat <- cbind(sub_mat, as.matrix(sg))
+  sub_mat <- cbind(sub_mat, as.matrix(sg_census))
+  sub_mat <- cbind(sub_mat, as.matrix(state))
+  sub_mat <- cbind(sub_mat, as.matrix(trans))
+  colnames(sub_mat) <- c("Triad", "IGraph", "Triad_Census", "State_ID", "Transitivity")
+  return(sub_mat)
+}
+
+
+
+iso_1_triads <- iso_triad(1)
+iso_2_triads <- iso_triad(2)
+iso_3_triads <- iso_triad(3)
+iso_4_triads <- iso_triad(4)
+iso_5_triads <- iso_triad(5)
+iso_6_triads <- iso_triad(6)
+iso_7_triads <- iso_triad(7)
+iso_8_triads <- iso_triad(8)
+iso_9_triads <- iso_triad(9)
+iso_10_triads <- iso_triad(10)
+iso_11_triads <- iso_triad(11)
+iso_12_triads <- iso_triad(12)
+iso_13_triads <- iso_triad(13)
+iso_14_triads <- iso_triad(14)
+iso_15_triads <- iso_triad(15)
+iso_16_triads <- iso_triad(16)
+iso_17_triads <- iso_triad(17)
+iso_18_triads <- iso_triad(18)
+iso_19_triads <- iso_triad(19)
+iso_20_triads <- iso_triad(20)
+iso_21_triads <- iso_triad(22)
+iso_22_triads <- iso_triad(21)
+
 
 
 
