@@ -106,7 +106,6 @@ for (i in 1:length(iso)) {
 }
 
 new_mat <- cbind(new_mat, iso_graph)
-colnames(new_mat) <- c("ID", "Count", "Example IGraph")
 # there are 22 total isomorphs
 
 
@@ -116,7 +115,6 @@ for (i in 1:length(iso)) {
        vertex.size = 25, vertex.frame.color = "#003a67", vertex.frame.width = 1.25,
        edge.color = "black", edge.arrow.size = .2, vertex.label = NA, main = "Name Goes Here")
 }
-
 
 
 # gets the triad census state and id
@@ -217,7 +215,6 @@ iso_triad <- function(iso_number = NULL) {
 }
 
 
-
 iso_1_triads <- iso_triad(1)
 iso_2_triads <- iso_triad(2)
 iso_3_triads <- iso_triad(3)
@@ -243,6 +240,28 @@ iso_22_triads <- iso_triad(21)
 
 
 
+iso_trans <- function(iso_number = NULL) {
+  data <- iso_triad(iso_number)
+  trans = 0
+  int = 0
+  for (i in 1:nrow(data)) {
+    if (data[[i,5]] == "Transitive") {
+      trans = trans + 1
+    }
+    if (data[[i,5]] == "Intransitive") {
+      trans = int + 1
+    }
+  }
+  return(list(Transitive = trans, Intransitive = int))
+}
+
+trans_num = list()
+for (i in 1:length(iso)) {
+  trans_num[[i]] <- unlist(iso_trans(i))
+}
+
+new_mat <- cbind(new_mat, as.matrix(trans_num))
+colnames(new_mat) <- c("ID", "Count", "Example IGraph", "Transitivity")
 
 
 
