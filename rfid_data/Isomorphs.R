@@ -249,7 +249,7 @@ iso_trans <- function(iso_number = NULL) {
       trans = trans + 1
     }
     if (data[[i,5]] == "Intransitive") {
-      trans = int + 1
+      int = int + 1
     }
   }
   return(list(Transitive = trans, Intransitive = int))
