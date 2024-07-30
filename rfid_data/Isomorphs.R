@@ -98,7 +98,6 @@ new_mat <- matrix(iso)
 new_mat <- cbind(new_mat, iso_count)
 
 
-# par(mfrow=c(1,1), mar=c(1,1,1,1))
 iso_graph <- list()
 for (i in 1:length(iso)) {
   m <- matrix(all_graphs[[iso_ex_num[i]]], nrow = nodes)
@@ -107,14 +106,6 @@ for (i in 1:length(iso)) {
 
 new_mat <- cbind(new_mat, iso_graph)
 # there are 22 total isomorphs
-
-
-par(mfrow=c(5,5), mar=c(0,0,1,0))
-for (i in 1:length(iso)) {
-  plot(iso_graph[[i]], layout = layout_in_circle(iso_graph[[1]]), vertex.color = "#80b2d7",
-       vertex.size = 25, vertex.frame.color = "#003a67", vertex.frame.width = 1.25,
-       edge.color = "black", edge.arrow.size = .2, vertex.label = NA, main = "Name Goes Here")
-}
 
 
 # gets the triad census state and id
@@ -192,7 +183,7 @@ triad_state <- function(census = NULL) {
 
 
 iso_triad <- function(iso_number = NULL) {
-  g = new_mat[[iso_number, 3]]
+  g = iso_graph[[iso_number]]
   individuals <- c(1, 2, 3, 4, 5, 6)
   ids <- combn(individuals, 3, simplify = FALSE)
   sg = rep(list(NA),length(ids))
@@ -215,28 +206,28 @@ iso_triad <- function(iso_number = NULL) {
 }
 
 
-iso_1_triads <- iso_triad(1)
-iso_2_triads <- iso_triad(2)
-iso_3_triads <- iso_triad(3)
-iso_4_triads <- iso_triad(4)
-iso_5_triads <- iso_triad(5)
-iso_6_triads <- iso_triad(6)
-iso_7_triads <- iso_triad(7)
-iso_8_triads <- iso_triad(8)
-iso_9_triads <- iso_triad(9)
-iso_10_triads <- iso_triad(10)
-iso_11_triads <- iso_triad(11)
-iso_12_triads <- iso_triad(12)
-iso_13_triads <- iso_triad(13)
-iso_14_triads <- iso_triad(14)
-iso_15_triads <- iso_triad(15)
-iso_16_triads <- iso_triad(16)
-iso_17_triads <- iso_triad(17)
-iso_18_triads <- iso_triad(18)
-iso_19_triads <- iso_triad(19)
-iso_20_triads <- iso_triad(20)
-iso_21_triads <- iso_triad(22)
-iso_22_triads <- iso_triad(21)
+# iso_1_triads <- iso_triad(1)
+# iso_2_triads <- iso_triad(2)
+# iso_3_triads <- iso_triad(3)
+# iso_4_triads <- iso_triad(4)
+# iso_5_triads <- iso_triad(5)
+# iso_6_triads <- iso_triad(6)
+# iso_7_triads <- iso_triad(7)
+# iso_8_triads <- iso_triad(8)
+# iso_9_triads <- iso_triad(9)
+# iso_10_triads <- iso_triad(10)
+# iso_11_triads <- iso_triad(11)
+# iso_12_triads <- iso_triad(12)
+# iso_13_triads <- iso_triad(13)
+# iso_14_triads <- iso_triad(14)
+# iso_15_triads <- iso_triad(15)
+# iso_16_triads <- iso_triad(16)
+# iso_17_triads <- iso_triad(17)
+# iso_18_triads <- iso_triad(18)
+# iso_19_triads <- iso_triad(19)
+# iso_20_triads <- iso_triad(20)
+# iso_21_triads <- iso_triad(21)
+# iso_22_triads <- iso_triad(22)
 
 
 
@@ -260,8 +251,129 @@ for (i in 1:length(iso)) {
   trans_num[[i]] <- unlist(iso_trans(i))
 }
 
+
+all_trans = vector()
+for (i in 1:length(iso)) {
+  all_trans <- append(all_trans, iso_trans(i)[[1]])
+}
+
+
+iso_names <- vector()
+iso_num <- rep(list(1), 20)
+for (i in 1:length(iso)) {
+  if (sum(all_trans == all_trans[i]) == 1) {
+    iso_names <- append(iso_names, toString(all_trans[i]))
+  } else {
+    temp_name <- as.vector(toString(all_trans[i]))
+    temp_name <- append(temp_name, letters[iso_num[[all_trans[i]]]])
+    temp_name <- paste(temp_name, collapse = "")
+    iso_names <- append(iso_names, temp_name)
+    iso_num[[all_trans[i]]] <- iso_num[[all_trans[i]]] + 1
+  }
+}
+
+
 new_mat <- cbind(new_mat, as.matrix(trans_num))
-colnames(new_mat) <- c("ID", "Count", "Example IGraph", "Transitivity")
+new_mat <- cbind(as.matrix(iso_names), new_mat)
+
+
+# test = iso_graph[[22]]
+# test_individuals <- c(1, 2, 3, 4, 5, 6)
+# test_ids <- combn(test_individuals, 3, simplify = FALSE)
+# test_sg = rep(list(NA),length(test_ids))
+# test_sg_census = rep(list(NA),length(test_ids))
+# test_state <- rep(list(NA),length(test_ids))
+# test_trans <- rep(list(NA),length(test_ids))
+# for (i in 1:length(test_ids)){
+#   test_sg[[i]] <- induced_subgraph(test, vids = test_ids[i][[1]])
+#   test_sg_census[[i]] <- triad_census(test_sg[[i]])
+#   test_state[[i]] <- triad_state(test_sg_census[[i]])[[1]]
+#   test_trans[[i]] <- triad_state(test_sg_census[[i]])[[2]]
+# }
+# sub_mat <- matrix(test_ids)
+# sub_mat <- cbind(sub_mat, as.matrix(test_sg))
+# sub_mat <- cbind(sub_mat, as.matrix(test_sg_census))
+# sub_mat <- cbind(sub_mat, as.matrix(test_state))
+# sub_mat <- cbind(sub_mat, as.matrix(test_trans))
+# colnames(sub_mat) <- c("Triad", "IGraph", "Triad_Census", "State_ID", "Transitivity")
+
+
+intrans = rep(list(),length(iso))
+for (i in 1:length(iso)) {
+  data = iso_graph[[i]]
+  individuals <- c(1, 2, 3, 4, 5, 6)
+  ids <- combn(individuals, 3, simplify = FALSE)
+  intrans_temp <- NULL
+  int_count = 1
+  for (j in 1:length(ids)) {
+    sg <- induced_subgraph(data, vids = ids[[j]])
+    sg_census <- triad_census(sg)
+    if (triad_state(sg_census)[[2]] == "Intransitive") {
+      intrans_temp[[int_count]] <- ids[[j]]
+      int_count <- int_count + 1
+    }
+  }
+  intrans[[i]] <- intrans_temp
+}
+
+new_mat <- cbind(new_mat, as.matrix(intrans))
+colnames(new_mat) <- c("ID", "Wins", "Count", "Example IGraph", "Transitivity", "Intransitive_Vert")
+
+iso_mat <- new_mat[c(1, 2, 4, 7, 14, 3, 6, 12, 15, 5, 11, 8, 10, 17, 9, 13, 18, 22, 16, 19, 21, 20),]
+
+x <- c(1, 0.5, -0.5, -1, -0.5, 0.5)
+y <- c(0, 1, 1, 0, -1, -1)
+coords <- data.frame(x, y)
+
+par(mfrow=c(5,5), mar=c(0,0,1,0))
+for (i in 1:length(iso)) {
+  plot(iso_mat[[i, 4]], layout = layout_in_circle(iso_graph[[1]]), vertex.color = "#80b2d7",
+       vertex.size = 25, vertex.frame.color = "black", vertex.frame.width = 1.25,
+       edge.color = "black", edge.arrow.size = .2, vertex.label = NA, main = iso_mat[[i, 1]])
+  for (j in 1:length(iso_mat[[i,6]])) {
+    try(polygon(coords[iso_mat[[i,6]][[j]],], col = rgb(128/255, 178/255, 215/255, 0.4), border = NA), silent = TRUE)
+  }
+}
+
+
+
+par(mfrow=c(5,5), mar=c(0,0,1,0))
+for (i in 1:length(iso)) {
+  plot(iso_mat[[i, 4]], layout = layout_in_circle(iso_graph[[1]]), vertex.color = "black",
+       vertex.size = 25, vertex.frame.color = "black", vertex.frame.width = 1.25,
+       edge.color = "black", edge.arrow.size = .2, vertex.label = NA, main = iso_mat[[i, 1]])
+  for (j in 1:length(iso_mat[[i,6]])) {
+    try(polygon(coords[iso_mat[[i,6]][[j]],], col = rgb(0, 0, 0, 0.25), border = NA), silent = TRUE)
+  }
+}
+
+
+# "#003a67"
+# "#80b2d7"
+
+
+
+
+# par(mfrow=c(1,1), mar=c(1,1,1,1))
+# plot(iso_mat[[22, 4]], layout = layout_in_circle(iso_graph[[1]]), vertex.color = "#80b2d7",
+#      vertex.size = 25, vertex.frame.color = "#003a67", vertex.frame.width = 1.25,
+#      edge.color = "black", edge.arrow.size = .2, vertex.label = NA, main = iso_mat[[i, 1]])
+# for (j in 1:length(iso_mat[[22,6]])) {
+#   try(polygon(coords[iso_mat[[22,6]][[j]],], col = rgb(0, 0, 0, 0.25), border = NA), silent = TRUE)
+# }
+
+
+
+
+
+
+
+plot(test_sg[[1]], layout = layout_in_circle(iso_graph[[1]]), vertex.color = "#80b2d7",
+     vertex.size = 25, vertex.frame.color = "#003a67", vertex.frame.width = 1.25,
+     edge.color = "black", edge.arrow.size = .2, vertex.label = NA, main = iso_names[1])
+
+
+
 
 
 
