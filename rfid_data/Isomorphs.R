@@ -2,6 +2,7 @@
 library(igraph)
 library(combinat)
 
+# total nodes
 nodes = 6
 
 permutations <- function(n = NULL) {
@@ -51,6 +52,7 @@ new_data_5 <- rep(chunk_5, total_graphs/length(chunk_5))
 
 
 
+# produces all possible graphs
 all_graphs <- list()
 for (i in 1:total_graphs) {
   all_graphs[[i]] <- c(0, new_data_5[[i]], abs(new_data_5[[i]][1] - 1), 0, new_data_4[[i]],
@@ -321,49 +323,72 @@ colnames(new_mat) <- c("ID", "Wins", "Count", "Example IGraph", "Transitivity", 
 
 iso_mat <- new_mat[c(1, 2, 4, 7, 14, 3, 6, 12, 15, 5, 11, 8, 10, 17, 9, 13, 18, 22, 16, 19, 21, 20),]
 
-x <- c(1, 0.5, -0.5, -1, -0.5, 0.5)
-y <- c(0, 1, 1, 0, -1, -1)
-coords <- data.frame(x, y)
+# x <- c(1, 0.5, -0.5, -1, -0.5, 0.5)
+# y <- c(0, 1, 1, 0, -1, -1)
+# coords <- data.frame(x, y)
 
-par(mfrow=c(5,5), mar=c(0,0,1,0))
+x2 <- c(0, 1, 1, 0, -1, -1)
+y2 <- c(1, 0.5, -0.5, -1, -0.5, 0.5)
+sideways <- as.matrix(data.frame(x2, y2))
+
+par(mfrow=c(5,5), mar=c(1,0,1,0))
 for (i in 1:length(iso)) {
-  plot(iso_mat[[i, 4]], layout = layout_in_circle(iso_graph[[1]]), vertex.color = "#80b2d7",
+  plot(iso_mat[[i, 4]], layout = sideways, vertex.color = "black",
        vertex.size = 25, vertex.frame.color = "black", vertex.frame.width = 1.25,
        edge.color = "black", edge.arrow.size = .2, vertex.label = NA, main = iso_mat[[i, 1]])
   for (j in 1:length(iso_mat[[i,6]])) {
-    try(polygon(coords[iso_mat[[i,6]][[j]],], col = rgb(128/255, 178/255, 215/255, 0.4), border = NA), silent = TRUE)
+    try(polygon(sideways[iso_mat[[i,6]][[j]],], col = rgb(0, 0, 0, 0.25), border = NA), silent = TRUE)
   }
 }
 
 
 
-par(mfrow=c(5,5), mar=c(0,0,1,0))
-for (i in 1:length(iso)) {
-  plot(iso_mat[[i, 4]], layout = layout_in_circle(iso_graph[[1]]), vertex.color = "black",
-       vertex.size = 25, vertex.frame.color = "black", vertex.frame.width = 1.25,
-       edge.color = "black", edge.arrow.size = .2, vertex.label = NA, main = iso_mat[[i, 1]])
-  for (j in 1:length(iso_mat[[i,6]])) {
-    try(polygon(coords[iso_mat[[i,6]][[j]],], col = rgb(0, 0, 0, 0.25), border = NA), silent = TRUE)
-  }
-}
+# par(mfrow=c(5,5), mar=c(0,0,1,0))
+# for (i in 1:length(iso)) {
+#   plot(iso_mat[[i, 4]], layout = sideways, vertex.color = "#80b2d7",
+#        vertex.size = 25, vertex.frame.color = "black", vertex.frame.width = 1.25,
+#        edge.color = "black", edge.arrow.size = .2, vertex.label = NA, main = iso_mat[[i, 1]])
+#   for (j in 1:length(iso_mat[[i,6]])) {
+#     try(polygon(sideways[iso_mat[[i,6]][[j]],], col = rgb(128/255, 178/255, 215/255, 0.4), border = NA), silent = TRUE)
+#   }
+# }
+
+
+# par(mfrow=c(5,5), mar=c(0,0,1,0))
+# for (i in 1:length(iso)) {
+#   plot(iso_mat[[i, 4]], layout = sideways, vertex.color = "#003a67",
+#        vertex.size = 25, vertex.frame.color = "#003a67", vertex.frame.width = 1.25,
+#        edge.color = "#003a67", edge.arrow.size = .2, vertex.label = NA, main = iso_mat[[i, 1]])
+#   for (j in 1:length(iso_mat[[i,6]])) {
+#     try(polygon(sideways[iso_mat[[i,6]][[j]],], col = adjustcolor("#003a67", alpha.f = 0.5), border = NA), silent = TRUE)
+#   }
+# }
+
 
 
 # "#003a67"
 # "#80b2d7"
 
 
-
-
 # par(mfrow=c(1,1), mar=c(1,1,1,1))
-# plot(iso_mat[[22, 4]], layout = layout_in_circle(iso_graph[[1]]), vertex.color = "#80b2d7",
+# plot(iso_mat[[22, 4]], layout = sideways, vertex.color = "#80b2d7",
 #      vertex.size = 25, vertex.frame.color = "#003a67", vertex.frame.width = 1.25,
 #      edge.color = "black", edge.arrow.size = .2, vertex.label = NA, main = iso_mat[[i, 1]])
 # for (j in 1:length(iso_mat[[22,6]])) {
-#   try(polygon(coords[iso_mat[[22,6]][[j]],], col = rgb(0, 0, 0, 0.25), border = NA), silent = TRUE)
+#   try(polygon(sideways[iso_mat[[22,6]][[j]],], col = rgb(0, 0, 0, 0.25), border = NA), silent = TRUE)
 # }
 
 
 
+
+
+
+
+
+
+for (j in 1:length(iso_mat[[22,6]])) {
+  try(polygon(coords[iso_mat[[22,6]][[j]],], col = rgb(0, 0, 0, 0.25), border = NA), silent = TRUE)
+}
 
 
 
