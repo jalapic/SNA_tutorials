@@ -2,6 +2,7 @@
 library(igraph)
 library(combinat)
 
+
 # total nodes
 nodes = 6
 
@@ -99,11 +100,12 @@ for (i in 1:length(sorted_combos)) {
 new_mat <- matrix(iso)
 new_mat <- cbind(new_mat, iso_count)
 
-
+iso_combos <- list()
 iso_graph <- list()
 for (i in 1:length(iso)) {
   m <- matrix(all_graphs[[iso_ex_num[i]]], nrow = nodes)
   iso_graph[[i]] <-graph_from_adjacency_matrix(m, mode="directed")
+  iso_combos[[i]] <- combos[[iso_ex_num[i]]]
 }
 
 new_mat <- cbind(new_mat, iso_graph)
@@ -319,9 +321,23 @@ for (i in 1:length(iso)) {
 }
 
 new_mat <- cbind(new_mat, as.matrix(intrans))
-colnames(new_mat) <- c("ID", "Wins", "Count", "Example IGraph", "Transitivity", "Intransitive_Vert")
+for (i in 1:nrow(new_mat)) {
+  for (j in 1:length(new_mat[[i, 2]])) {
+    new_mat[[i, 2]][j] <- abs(5 - new_mat[[i, 2]][j])
+  }
+}
 
+colnames(new_mat) <- c("ID", "Wins", "Count", "Example IGraph", "Transitivity", "Intransitive_Vert")
+iso_combos <- iso_combos[c(1, 2, 4, 7, 14, 3, 6, 12, 15, 5, 11, 8, 10, 17, 9, 13, 18, 22, 16, 19, 21, 20)]
 iso_mat <- new_mat[c(1, 2, 4, 7, 14, 3, 6, 12, 15, 5, 11, 8, 10, 17, 9, 13, 18, 22, 16, 19, 21, 20),]
+
+
+
+# iso_mat[[2,2]][unlist(iso_mat[[2,6]])]
+
+
+
+
 
 # x <- c(1, 0.5, -0.5, -1, -0.5, 0.5)
 # y <- c(0, 1, 1, 0, -1, -1)
@@ -330,6 +346,10 @@ iso_mat <- new_mat[c(1, 2, 4, 7, 14, 3, 6, 12, 15, 5, 11, 8, 10, 17, 9, 13, 18, 
 x2 <- c(0, 1, 1, 0, -1, -1)
 y2 <- c(1, 0.5, -0.5, -1, -0.5, 0.5)
 sideways <- as.matrix(data.frame(x2, y2))
+
+
+
+
 
 par(mfrow=c(5,5), mar=c(1,0,1,0))
 for (i in 1:length(iso)) {
@@ -379,29 +399,59 @@ for (i in 1:length(iso)) {
 # }
 
 
+# plots the isomorphs with number of wins on each vertex
+par(mfrow=c(5,5), mar=c(1,0,1,0))
+for (i in 1:length(iso)) {
+  plot(iso_mat[[i, 4]], layout = sideways, vertex.color = "black",
+       vertex.size = 25, vertex.frame.color = "black", vertex.frame.width = 1.25,
+       edge.color = "black", vertex.label = iso_mat[[i, 2]], vertex.label.color = "black", edge.arrow.size = .2, main = iso_mat[[i, 1]])
+  for (j in 1:length(iso_mat[[i,6]])) {
+    try(polygon(sideways[iso_mat[[i,6]][[j]],], col = rgb(0, 0, 0, 0.25), border = NA), silent = TRUE)
+  }
+  for (k in 1:length(iso_mat[[i,2]])) {
+    text(sideways[k, 1], sideways[k, 2], abs(5 - iso_combos[[i]][k]), col = "white")
+  }
+}
 
+bin <- list(as.list(c(1, 0, 0)), as.list(c(1, 1, 0)), as.list(c(0, 0, 1)), as.list(c(0, 1, 0)), as.list(c(1, 0, 1)), as.list(c(0, 1, 1)))
 
-
-
-
-
-
-for (j in 1:length(iso_mat[[22,6]])) {
-  try(polygon(coords[iso_mat[[22,6]][[j]],], col = rgb(0, 0, 0, 0.25), border = NA), silent = TRUE)
+par(mfrow=c(5,5), mar=c(1,0,1,0))
+for (i in 1:length(iso)) {
+  plot(iso_mat[[i, 4]], layout = sideways, vertex.color = "black",
+       vertex.size = 25, vertex.frame.color = "black", vertex.frame.width = 1.25,
+       edge.color = "black", vertex.label = iso_mat[[i, 2]], vertex.label.color = "black", edge.arrow.size = .2, main = iso_mat[[i, 1]])
+  for (j in 1:length(iso_mat[[i,6]])) {
+    try(polygon(sideways[iso_mat[[i,6]][[j]],], col = rgb(bin[[j]][[1]], bin[[j]][[2]], bin[[j]][[3]], 0.25), border = rgb(bin[[j]][[1]], bin[[j]][[2]], bin[[j]][[3]], 1)), silent = TRUE)
+  }
+  for (k in 1:length(iso_mat[[i,2]])) {
+    text(sideways[k, 1], sideways[k, 2], abs(5 - iso_combos[[i]][k]), col = "white")
+  }
 }
 
 
 
+# returns a list of possible id changes if one pair flips
+iso_order <- list()
+iso_order_num <- 1
+for (i in 1:nrow(iso_mat)) {
+  for (j in 1:nrow(iso_mat)) {
+    if (identical(sort(iso_mat[[i,2]] - iso_mat[[j, 2]]), c(-1, 0, 0, 0, 0, 1))) {
+      iso_order[[iso_order_num]] <- sort(c(iso_mat[[i,1]], iso_mat[[j,1]]), decreasing = TRUE)
+      iso_order_num = iso_order_num + 1
+    }
+  }
+}
+iso_order <- unique(iso_order)
 
-plot(test_sg[[1]], layout = layout_in_circle(iso_graph[[1]]), vertex.color = "#80b2d7",
-     vertex.size = 25, vertex.frame.color = "#003a67", vertex.frame.width = 1.25,
-     edge.color = "black", edge.arrow.size = .2, vertex.label = NA, main = iso_names[1])
 
 
 
 
 
 
+
+
+# vertex.label = iso_mat[[i, 2]], vertex.label.color = "black",
 
 
 # ## Data from  http://users.cecs.anu.edu.au/~bdm/data/graphs.html ##

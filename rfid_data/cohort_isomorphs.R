@@ -195,3 +195,8 @@ markov <- function(cohort) {
   return(t_matrix)
 }
 
+
+
+
+
+
