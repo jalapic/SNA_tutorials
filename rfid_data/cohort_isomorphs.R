@@ -16,7 +16,6 @@ library(ndtv)
 library(tidyverse)
 library(compete)
 
-
 # ids of the isomorphs
 cohort_ids <- list("20",
             "19a",
@@ -40,7 +39,6 @@ cohort_ids <- list("20",
             "13a",
             "13b",
             "12")
-
 
 # number of wins per isomorph
 cohort_wins <- as.matrix(list(c(0, 1, 2, 3, 4, 5),
@@ -170,16 +168,43 @@ ids_time <- function(cohort = NULL) {
 }
 
 
+iso_order <- list()
+iso_order_num <- 1
+not_iso_order <- list()
+not_iso_order_num <- 1
+for (i in 1:nrow(cohort_iso_mat)) {
+  for (j in 1:nrow(cohort_iso_mat)) {
+    # returns a list of possible id changes if one pair flips
+    if (identical(sort(cohort_iso_mat[[i,2]] - cohort_iso_mat[[j, 2]]), c(-1, 0, 0, 0, 0, 1))) {
+      iso_order[[iso_order_num]] <- sort(c(cohort_iso_mat[[i,1]], cohort_iso_mat[[j,1]]), decreasing = TRUE)
+      iso_order_num = iso_order_num + 1
+    }
+    else if (identical(sort(cohort_iso_mat[[i,2]] - cohort_iso_mat[[j, 2]]), c(0, 0, 0, 0, 0, 0))) {
+      iso_order[[iso_order_num]] <- sort(c(cohort_iso_mat[[i,1]], cohort_iso_mat[[j,1]]), decreasing = TRUE)
+      iso_order_num = iso_order_num + 1
+    }
+    # returns a list of impossible id changes if one pair flips
+    else {
+      not_iso_order[[not_iso_order_num]] <- sort(c(cohort_iso_mat[[i,1]], cohort_iso_mat[[j,1]]), decreasing = TRUE)
+      not_iso_order_num = not_iso_order_num + 1
+    }
+  }
+}
+iso_order <- unique(iso_order)
+not_iso_order <- unique(not_iso_order)
+
+
 # returns Markov Transition Matrix
 markov <- function(cohort) {
-  vec <- unlist(ids_time(cohort)[!is.na(ids_time(cohort))])
+  ids_of_cohort <- ids_time(cohort)
+  vec <- unlist(ids_of_cohort[!is.na(ids_of_cohort)])
   
   states <- unique(vec)
   n_states <- length(states)
   
   # Initialize transition matrix
-  t_matrix <- matrix(0, nrow = n_states, ncol = n_states, 
-                     dimnames = list(sort(states, decreasing = TRUE), sort(states, decreasing = TRUE)))
+  t_matrix <- matrix(0, nrow = length(cohort_ids), ncol = length(cohort_ids), 
+                     dimnames = list(sort(unlist(cohort_ids), decreasing = TRUE), sort(unlist(cohort_ids), decreasing = TRUE)))
   
   # Count transitions
   for (i in 1:(length(vec) - 1)) {
@@ -192,10 +217,46 @@ markov <- function(cohort) {
   t_matrix <- t_matrix / rowSums(t_matrix)
   t_matrix <- round(t_matrix, 2)
   
+  # makes NA if the state doesn't occur
+  for (i in cohort_ids) {
+    if (!(i %in% ids_of_cohort)) {
+      t_matrix[i, ] <- NA
+      t_matrix[, i] <- NA
+    }
+  }
+  
+  for (j in 1:length(not_iso_order)) {
+    t_matrix[not_iso_order[[j]][1], not_iso_order[[j]][2]] <- NA
+    t_matrix[not_iso_order[[j]][1], not_iso_order[[j]][2]] <- NA
+  }
+  
   return(t_matrix)
 }
 
 
+
+c1_markov <- markov(c1)
+c2_markov <- markov(c2)
+c3_markov <- markov(c3)
+c4_markov <- markov(c4)
+c5_markov <- markov(c5)
+# c6_markov <- markov(c6)
+c7_markov <- markov(c7)
+c8_markov <- markov(c8)
+c9_markov <- markov(c9)
+c10_markov <- markov(c10)
+
+
+c1_isomorphs <- table(unlist(ids_time(c1)))
+c2_isomorphs <- table(unlist(ids_time(c2)))
+c3_isomorphs <- table(unlist(ids_time(c3)))
+c4_isomorphs <- table(unlist(ids_time(c4)))
+c5_isomorphs <- table(unlist(ids_time(c5)))
+# c6_isomorphs <- table(unlist(ids_time(c6)))
+c7_isomorphs <- table(unlist(ids_time(c7)))
+c8_isomorphs <- table(unlist(ids_time(c8)))
+c9_isomorphs <- table(unlist(ids_time(c9)))
+c10_isomorphs <- table(unlist(ids_time(c10)))
 
 
 

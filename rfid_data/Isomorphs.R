@@ -430,23 +430,42 @@ for (i in 1:length(iso)) {
 
 
 
-# returns a list of possible id changes if one pair flips
+
 iso_order <- list()
 iso_order_num <- 1
+not_iso_order <- list()
+not_iso_order_num <- 1
 for (i in 1:nrow(iso_mat)) {
   for (j in 1:nrow(iso_mat)) {
+    # returns a list of possible id changes if one pair flips
     if (identical(sort(iso_mat[[i,2]] - iso_mat[[j, 2]]), c(-1, 0, 0, 0, 0, 1))) {
       iso_order[[iso_order_num]] <- sort(c(iso_mat[[i,1]], iso_mat[[j,1]]), decreasing = TRUE)
       iso_order_num = iso_order_num + 1
     }
+    # returns a list of impossible id changes if one pair flips
+    else if (identical(sort(iso_mat[[i,2]] - iso_mat[[j, 2]]), c(0, 0, 0, 0, 0, 0))) {
+      iso_order[[iso_order_num]] <- sort(c(iso_mat[[i,1]], iso_mat[[j,1]]), decreasing = TRUE)
+      iso_order_num = iso_order_num + 1
+    }
+    else {
+      not_iso_order[[not_iso_order_num]] <- sort(c(iso_mat[[i,1]], iso_mat[[j,1]]), decreasing = TRUE)
+      not_iso_order_num = not_iso_order_num + 1
+    }
   }
 }
 iso_order <- unique(iso_order)
+not_iso_order <- unique(not_iso_order)
 
 
 
+# empty transition matrix
+t_matrix <- matrix(0, nrow = length(new_mat[,1]), ncol = length(new_mat[,1]), 
+                   dimnames = list(sort(unlist(new_mat[,1]), decreasing = TRUE), sort(unlist(new_mat[,1]), decreasing = TRUE)))
 
-
+for (i in 1:length(iso_order)) {
+  t_matrix[iso_order[[i]][1], iso_order[[i]][2]] <- NA
+  t_matrix[iso_order[[i]][2], iso_order[[i]][1]] <- NA
+}
 
 
 
