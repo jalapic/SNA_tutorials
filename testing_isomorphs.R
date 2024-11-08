@@ -10,7 +10,7 @@ library(ndtv)
 library(tidyverse)
 library(compete)
 
-ago_data <- read.csv("~/Documents/School Stuff/Coding/R/ago_data.csv", sep=";")
+ago_data <- read.csv("ago_data.csv", sep=";")
 ago_data$Winner <- as.character(ago_data$Winner)
 ago_data$Loser <- as.character(ago_data$Loser)
 
