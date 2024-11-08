@@ -1,12 +1,4 @@
-# triad census
-
-# tubetrans =  the tube they went through
-# value1 = start time going through tube
-# value2 = end time going through tube
-# vector1 = winner/actor - ie mouse that did the chasing
-# vector2 = loser/recipient - i.e. mouse that got chased
 library(igraph)
-# just the actors and recipients: c7[, c("vector1","vector2")] 
 library(hierformR)
 library(network) 
 library(sna)
@@ -18,102 +10,37 @@ library(ndtv)
 library(tidyverse)
 library(compete)
 
-# transitive: 030T [9]
-# on its way to being transitive: 021U [5] and 021D [4]
-# intransitive: 030C [10]
+ago_data <- read.csv("~/Documents/School Stuff/Coding/R/ago_data.csv", sep=";")
+ago_data$Winner <- as.character(ago_data$Winner)
+ago_data$Loser <- as.character(ago_data$Loser)
 
-# import
-c1 <- read_csv("rfid_data/cohort1.csv",
-               col_types = cols(vector1 = col_character(), 
-                                vector2 = col_character()))
-c2 <- read_csv("rfid_data/cohort2.csv",
-               col_types = cols(vector1 = col_character(), 
-                                vector2 = col_character()))
-c3 <- read_csv("rfid_data/cohort3.csv",
-               col_types = cols(vector1 = col_character(), 
-                                vector2 = col_character()))
-c4 <- read_csv("rfid_data/cohort4.csv",
-               col_types = cols(vector1 = col_character(), 
-                                vector2 = col_character()))
-c5 <- read_csv("rfid_data/cohort5.csv",
-               col_types = cols(vector1 = col_character(), 
-                                vector2 = col_character()))
-# c6 <- read_csv("rfid_data/cohort6.csv",
-# col_types = cols(vector1 = col_character(), 
-#                 vector2 = col_character()))
-c7 <- read_csv("rfid_data/cohort7.csv",
-               col_types = cols(vector1 = col_character(), 
-                                vector2 = col_character()))
-c8 <- read_csv("rfid_data/cohort8.csv",
-               col_types = cols(vector1 = col_character(), 
-                                vector2 = col_character()))
-c9 <- read_csv("rfid_data/cohort9.csv",
-               col_types = cols(vector1 = col_character(), 
-                                vector2 = col_character()))
-c10 <- read_csv("rfid_data/cohort10.csv",
-                col_types = cols(vector1 = col_character(), 
-                                 vector2 = col_character()))
-#make sure data is ordered by time (value 1 column)
-c1_og <- c1 %>% arrange(value1)
-c2_og <- c2 %>% arrange(value1)
-c3_og <- c3 %>% arrange(value1)
-c4_og <- c4 %>% arrange(value1)
-c5_og <- c5 %>% arrange(value1)
-# c6_og <- c6 %>% arrange(value1)
-c7_og <- c7 %>% arrange(value1)
-c8_og <- c8 %>% arrange(value1)
-c9_og <- c9 %>% arrange(value1)
-c10_og <- c10 %>% arrange(value1)
+group_1 <- ago_data %>% filter(Group == 1) %>% arrange(Date)
+group_2 <- ago_data %>% filter(Group == 2) %>% arrange(Date)
+group_3 <- ago_data %>% filter(Group == 3) %>% arrange(Date)
+group_4 <- ago_data %>% filter(Group == 4) %>% arrange(Date)
+group_5 <- ago_data %>% filter(Group == 5) %>% arrange(Date)
 
-cohort_lastints <- function(cohort = NULL) {
-  last_cohort <- lastints(cohort[, 4:5])
-  # for (i in 1:length(last_cohort)) {
-  #   last_cohort[[i]] = last_cohort[[i]][!duplicated(last_cohort[[i]][, 4:5], fromLast = TRUE), ]
-  # }
+
+cohort_lastints <- function(cohort = NULL, winner_column = 3, loser_column = 4) {
+  last_cohort <- lastints(cohort[, c(winner_column, loser_column)])
   return(last_cohort)
 }
 
-# makes all cohorts just the times
-# c1_time <- as.matrix(c1[, 2:3], dimnames = c("Enter_Time", "Exit_Time"))
-# colnames(c1_time) <- c("Enter_Time", "Exit_Time")
-# c2_time <- c2[, 2:3]
-# colnames(c2_time) <- c("Enter_Time", "Exit_Time")
-# c3_time <- c3[, 2:3]
-# colnames(c3_time) <- c("Enter_Time", "Exit_Time")
-# c4_time <- c4[, 2:3]
-# colnames(c4_time) <- c("Enter_Time", "Exit_Time")
-# c5_time <- c5[, 2:3]
-# colnames(c5_time) <- c("Enter_Time", "Exit_Time")
-# # c6_time <- c6[, 2:3]
-# # colnames(c6_time) <- c("Enter_Time", "Exit_Time")
-# c7_time <- c7[, 2:3]
-# colnames(c7_time) <- c("Enter_Time", "Exit_Time")
-# c8_time <- c8[, 2:3]
-# colnames(c8_time) <- c("Enter_Time", "Exit_Time")
-# c9_time <- c9[, 2:3]
-# colnames(c9_time) <- c("Enter_Time", "Exit_Time")
-# c10_time <- c10[, 2:3]
-# colnames(c10_time) <- c("Enter_Time", "Exit_Time")
+g1 <- cohort_lastints(group_1)
+g2 <- cohort_lastints(group_2)
+g3 <- cohort_lastints(group_3)
+g4 <- cohort_lastints(group_4)
+g5 <- cohort_lastints(group_5)
 
 
-# makes all cohorts just the last interactions
-c1 <- cohort_lastints(c1_og)
-c2 <- cohort_lastints(c2_og)
-c3 <- cohort_lastints(c3_og)
-c4 <- cohort_lastints(c4_og)
-c5 <- cohort_lastints(c5_og)
-# c6 <- cohort_lastints(c6_og)
-c7 <- cohort_lastints(c7_og)
-c8 <- cohort_lastints(c8_og)
-c9 <- cohort_lastints(c9_og)
-c10 <- cohort_lastints(c10_og)
 
-
-best_order <- function(cohort_og = NULL) {
-  mat <- get_wl_matrix(as.data.frame(cohort_og[,4:5]))
+best_order <- function(cohort_og = NULL, winner_column = 3, loser_column = 4) {
+  mat <- get_wl_matrix(as.data.frame(cohort_og[,c(winner_column, loser_column)]))
   besto <- isi13(mat)$best_order
   return(besto)
 }
+
+besto_g1 <- best_order(group_1)
 
 
 # creates a igraph object for that cohort
@@ -125,21 +52,6 @@ cohort_graph <- function(cohort = NULL) {
   return(graph_cohort)
 }
 
-
-
-# set_layout <- function(cohort = NULL) {
-  # g <- cohort_graph(cohort)[[length(cohort)]]
-  # last <- cohort[[length(cohort)]]
-  # l = layout_in_circle(g, order = sort(V(g)))
-  # return(l)
-# }
-
-# plot(graph_from_edgelist(as.matrix(last_cohort[[length(last_cohort)]]), directed = TRUE), layout = l, edge.curved = 0)
-# rolling[[length(last_cohort)]]
-
-
-
-# gets the triad census state for what number of the column it's in
 triad_state <- function(state = NULL) {
   name = NULL
   trans = NULL
@@ -211,9 +123,37 @@ triad_state <- function(state = NULL) {
 }
 
 
+g1_graphs <- cohort_graph(g1)
 
 
-# returns triad census for that cohort for every time
+
+'''
+
+set_layout <- function(cohort = NULL) {
+  g <- cohort_graph(cohort)[[length(cohort)]]
+  last <- cohort[[length(cohort)]]
+  l = layout_in_circle(g, order = sort(V(g)))
+  return(l)
+}
+
+l = set_layout(g1)
+
+plot(g1_graphs[[4118]], layout = l, vertex.size = 1, edge.arrow.size = .1, vertex.label = NA, edge.color = "#00aeff50")
+
+"#00aeff50"
+
+
+plot(g1_graphs[[4000]], layout = l, vertex.color = "black",
+     vertex.size = 1, vertex.frame.color = "black", vertex.frame.width = 1.25,
+     edge.color = "#00aeff50", edge.arrow.size = .2, vertex.label.color = "black")
+
+'''
+
+
+
+
+
+
 rolling_cohort <- function(cohort = NULL) {
   rolling = list()
   rolling_graph <- cohort_graph(cohort)
@@ -222,6 +162,10 @@ rolling_cohort <- function(cohort = NULL) {
   }
   return(rolling)
 }
+
+
+rolling_g1 <- rolling_cohort(g1)
+
 
 
 # plots the proportion that a triad state appears across time for that cohort
@@ -242,7 +186,6 @@ plot_triad <- function(cohort = NULL, state = NULL) {
 }
 
 
-# plots the change in proportion across time for 021D, 021U, and 030T
 plot_all <- function(cohort = NULL, cohort_number = NULL) {
   plot_4 <- plot_triad(cohort, 4) + ggtitle(paste0("Rolling Triad - Cohort ", cohort_number))
   plot_5 <- plot_triad(cohort, 5) + ggtitle(paste0("Rolling Triad - Cohort ", cohort_number))
@@ -251,29 +194,30 @@ plot_all <- function(cohort = NULL, cohort_number = NULL) {
 }
 
 
+
+
+
+
 # plots proportion of 021D, 021U, and 030T across time for all cohorts
-plot_all(c1, 1)
-plot_all(c2, 2)
-plot_all(c3, 3)
-plot_all(c4, 4)
-plot_all(c5, 5)
-# plot_all(c6, 6)
-plot_all(c7, 7)
-plot_all(c8, 8)
-plot_all(c9, 9)
-plot_all(c10, 10)
+plot_all(g1, 1)
+plot_all(g2, 2)
+plot_all(g3, 3)
+plot_all(g4, 4)
+plot_all(g5, 5)
 
 
-# rolling_censusX = list()
-# for (m in 1:(length(rolling_g))) {
-#   rolling_censusX[[m]] = triad_census(rolling_plots[[m]])
-# }
 
 new_combn <- function(cohort = NULL, group_size = NULL){
   individuals <- unique(unlist(cohort[length(cohort)], use.names = FALSE))
   all_combos <- combn(individuals, group_size, simplify = FALSE)
   return(all_combos)
 }
+
+
+# example
+group_1_all_triads <- new_combn(g1, 3)
+
+
 
 
 # input: cohort name, triad id number, time
@@ -288,7 +232,11 @@ triad_sub_time <- function(cohort = NULL, triad = NULL, time = NULL) {
   return(list(ids[[triad]], sg, sg_census))
 }
 
-# example: triad_sub_time(cohort = c10, triad = 4, time = 888)
+
+# example
+g1_tri_1_time_1000 <- triad_sub_time(cohort = g1, triad = 1, time = 1000)
+# if it returns with no subgraph or subgraph census, that means that triad hasn't interacted yet
+
 
 
 # input: cohort name, triad id number
@@ -297,8 +245,8 @@ triad_sub_time <- function(cohort = NULL, triad = NULL, time = NULL) {
 triad_sub_all <- function(cohort = NULL, triad = NULL) {
   g = cohort_graph(cohort)
   ids <- new_combn(cohort, 3)
-  sg = rep(list(NA),length(cohort))
-  sg_census = rep(list(NA),length(cohort))
+  sg = rep(list(NA), length(cohort))
+  sg_census = rep(list(NA), length(cohort))
   for (i in 1:length(cohort)){
     try(sg[[i]] <- induced_subgraph(g[[i]], vids = ids[triad][[1]]), silent = TRUE)
     try(sg_census[[i]] <- triad_census(sg[[i]]), silent = TRUE)
@@ -306,12 +254,11 @@ triad_sub_all <- function(cohort = NULL, triad = NULL) {
   return(list(ids[[triad]], sg, sg_census))
 }
 
+# example
+g1_subgraphs <- triad_sub_all(group = g1, triad = 1)
 
-# example: triad_sub_all(cohort = c10, triad = 4)
 
 
-
-# returns a list of the number of edges for each time
 triad_edge_count <- function(cohort = NULL, triad = NULL) {
   data <- triad_sub_all(cohort, triad)
   e <- rep(list(NA),length(cohort))
@@ -320,6 +267,9 @@ triad_edge_count <- function(cohort = NULL, triad = NULL) {
   }
   return(e)
 }
+
+# example
+g1_edge_count <- triad_edge_count(group = g1, triad = 1)
 
 
 
@@ -348,54 +298,53 @@ triad_state_trans <- function(cohort = NULL, triad = NULL) {
 
 
 # returns the timecodes based on the cohort number
-cohort_time <- function(cohort_number = NULL) {
-  time = NULL
-  if (cohort_number == 1) {
-    time = c1_og[, 2:3]
-  }
-  if (cohort_number == 2) {
-    time = c2_og[, 2:3]
-  }
-  if (cohort_number == 3) {
-    time = c3_og[, 2:3]
-  }
-  if (cohort_number == 4) {
-    time = c4_og[, 2:3]
-  }
-  if (cohort_number == 5) {
-    time = c5_og[, 2:3]
-  }
-  if (cohort_number == 6) {
-    time = c6_og[, 2:3]
-  }
-  if (cohort_number == 7) {
-    time = c7_og[, 2:3]
-  }
-  if (cohort_number == 8) {
-    time = c8_og[, 2:3]
-  }
-  if (cohort_number == 9) {
-    time = c9_og[, 2:3]
-  }
-  if (cohort_number == 10) {
-    time = c10_og[, 2:3]
-  }
+cohort_time <- function(cohort, time_column = 1) {
+  time = "Failed"
+  try(if (identical(cohort, g1)) {
+    time = group_1[, time_column]
+  }, silent = TRUE)
+  try(if (identical(cohort, g2)) {
+    time = group_2[, time_column]
+  }, silent = TRUE)
+  try(if (identical(cohort, g3)) {
+    time = group_3[, time_column]
+  }, silent = TRUE)
+  try(if (identical(cohort, g4)) {
+    time = group_4[, time_column]
+  }, silent = TRUE)
+  try(if (identical(cohort, g5)) {
+    time = group_5[, time_column]
+  }, silent = TRUE)
   return(time)
 }
 
 
+
+
 # creates a new matrix for subtriad that includes the times, igraph objects,
 # triad census, number of edges, the state id, and transitivity
-triad_matrix <- function(cohort_number = NULL, cohort = NULL, triad = NULL) {
-  tri_mat <- as.matrix(triad_sub_all(cohort, triad)[[2]]) # igraph
-  tri_mat <- cbind(tri_mat, as.matrix(triad_sub_all(cohort, triad)[[3]])) # triad census
-  tri_mat <- cbind(cohort_time(cohort_number), tri_mat) # timecodes
+triad_matrix <- function(cohort = NULL, triad = NULL) {
+  igraph_and_census <- triad_sub_all(cohort, triad)
+  state_trans <- triad_state_trans(cohort, triad)
+  tri_mat <- as.matrix(igraph_and_census[[2]]) # igraph
+  tri_mat <- cbind(tri_mat, as.matrix(igraph_and_census[[3]])) # triad census
+  tri_mat <- cbind(cohort_time(cohort), tri_mat) # timecodes
   tri_mat <- cbind(tri_mat, as.matrix(triad_edge_count(cohort, triad))) # edge count
-  tri_mat <- cbind(tri_mat, as.matrix(triad_state_trans(cohort, triad)[[1]])) # triad state
-  tri_mat <- cbind(tri_mat, as.matrix(triad_state_trans(cohort, triad)[[2]])) # transitive or intransitive
-  colnames(tri_mat) <- c("Enter_Time", "Exit_Time", "IGraph", "Triad_Census", "Edge_Count", "ID", "Transitivity")
-  return(tri_mat) # it's going to give an error message, but it still works if you assign it to a name
+  tri_mat <- cbind(tri_mat, as.matrix(state_trans[[1]])) # triad state
+  tri_mat <- cbind(tri_mat, as.matrix(state_trans[[2]])) # transitive or intransitive
+  colnames(tri_mat) <- c(paste("Triad:", paste0(new_combn(cohort, 3)[[triad]], collapse = "-"), "Date"), "IGraph", "Triad_Census", "Edge_Count", "ID", "Transitivity")
+  return(tri_mat) # it's going to give an error message if you run it by itself, but it still works if you assign it to an object
 }
+
+
+
+# example
+g1_mat <- triad_matrix(cohort = g1, triad = 4)
+
+
+
+
+
 
 ## as.numeric(gsub("c","","c10"))
 ## as.numeric(gsub("\\D","","c10"))
@@ -404,10 +353,26 @@ triad_matrix <- function(cohort_number = NULL, cohort = NULL, triad = NULL) {
 # Example: tmat.c10[60,3]
 
 
-
+# takes forever, not sure if there's something wrong with the code or if it's just because there's so many triads
 # returns the average time to complete triads for each vertex, the number of the
 # last interaction for each vertex, and the different times each vertex was completed
-triad_complete <- function(cohort = NULL, cohort_og = NULL) {
+triad_complete <- function(cohort = NULL) {
+  cohort_og = "Failed"
+  try(if (identical(cohort, g1)) {
+    cohort_og = group_1
+  }, silent = TRUE)
+  try(if (identical(cohort, g2)) {
+    cohort_og = group_2
+  }, silent = TRUE)
+  try(if (identical(cohort, g3)) {
+    cohort_og = group_3
+  }, silent = TRUE)
+  try(if (identical(cohort, g4)) {
+    cohort_og = group_4
+  }, silent = TRUE)
+  try(if (identical(cohort, g5)) {
+    cohort_og = group_5
+  }, silent = TRUE)
   triad_ids <- new_combn(cohort, 3)
   outres <- NULL
   besto <- best_order(cohort_og)
@@ -461,7 +426,7 @@ triad_complete <- function(cohort = NULL, cohort_og = NULL) {
 
 # ex: triad_complete(c1, c1_og)
 
-out <- triad_complete(c1, c1_og)
+out <- triad_complete(g1)
 
 out
 
@@ -470,7 +435,7 @@ out
 
 ### Checking if graphs are the same.
 
-out1<-triad_matrix(1, c1, 1)
+out1 <- triad_matrix(g1, 1)
 
 out1[40,3]
 out1[43,3]
@@ -580,16 +545,16 @@ state_trans <- function(cohort = NULL) {
   combination <- factorial(indiv) / ((factorial(3) * (factorial(indiv - 3))))
   all_state = rep(list(NA),length(cohort))
   
-
+  
   return
 }
-  
+
 
 
 # for (i in 1:combination) {
-  # s_t <- triad_state_trans(cohort, i)
-  # for (j in 1:length(s_t[[1]])) {
-  # }
+# s_t <- triad_state_trans(cohort, i)
+# for (j in 1:length(s_t[[1]])) {
+# }
 # }
 
 
@@ -616,7 +581,7 @@ data = cohort_graph(c1)
 # ids <- unique(unlist(c1[length(c1)], use.names = FALSE))
 # g = rep(list(NA), length(c1))
 # for (i in 1:length(c1)){
-  # try(g[[i]] <- induced_subgraph(data[[i]], vids = ids), silent = TRUE)
+# try(g[[i]] <- induced_subgraph(data[[i]], vids = ids), silent = TRUE)
 # }
 triad = NULL
 for (i in 1:length(c1)) {
@@ -627,17 +592,3 @@ all_mat <- cbind(all_mat, as.matrix(data)) # igraph
 all_mat <- cbind(all_mat, as.matrix(triad)) # triad census
 all_mat <- cbind(all_mat, as.matrix(edge_count(c1))) # edge count
 return(all_mat)
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -413,6 +413,9 @@ for (i in 1:length(iso)) {
   }
 }
 
+
+
+# this is the colorful one
 bin <- list(as.list(c(1, 0, 0)), as.list(c(1, 1, 0)), as.list(c(0, 0, 1)), as.list(c(0, 1, 0)), as.list(c(1, 0, 1)), as.list(c(0, 1, 1)))
 
 par(mfrow=c(5,5), mar=c(1,0,1,0))
@@ -462,9 +465,9 @@ not_iso_order <- unique(not_iso_order)
 t_matrix <- matrix(0, nrow = length(new_mat[,1]), ncol = length(new_mat[,1]), 
                    dimnames = list(sort(unlist(new_mat[,1]), decreasing = TRUE), sort(unlist(new_mat[,1]), decreasing = TRUE)))
 
-for (i in 1:length(iso_order)) {
-  t_matrix[iso_order[[i]][1], iso_order[[i]][2]] <- NA
-  t_matrix[iso_order[[i]][2], iso_order[[i]][1]] <- NA
+for (i in 1:length(not_iso_order)) {
+  t_matrix[not_iso_order[[i]][1], not_iso_order[[i]][2]] <- NA
+  t_matrix[not_iso_order[[i]][2], not_iso_order[[i]][1]] <- NA
 }
 
 

@@ -235,6 +235,7 @@ markov <- function(cohort) {
 
 
 
+# markov transition matrix for each cohort
 c1_markov <- markov(c1)
 c2_markov <- markov(c2)
 c3_markov <- markov(c3)
@@ -247,6 +248,8 @@ c9_markov <- markov(c9)
 c10_markov <- markov(c10)
 
 
+
+# shows which isomorphs appear in each cohort
 c1_isomorphs <- table(unlist(ids_time(c1)))
 c2_isomorphs <- table(unlist(ids_time(c2)))
 c3_isomorphs <- table(unlist(ids_time(c3)))
