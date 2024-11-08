@@ -127,7 +127,6 @@ g1_graphs <- cohort_graph(g1)
 
 
 
-'''
 
 set_layout <- function(cohort = NULL) {
   g <- cohort_graph(cohort)[[length(cohort)]]
@@ -140,14 +139,12 @@ l = set_layout(g1)
 
 plot(g1_graphs[[4118]], layout = l, vertex.size = 1, edge.arrow.size = .1, vertex.label = NA, edge.color = "#00aeff50")
 
-"#00aeff50"
 
 
 plot(g1_graphs[[4000]], layout = l, vertex.color = "black",
      vertex.size = 1, vertex.frame.color = "black", vertex.frame.width = 1.25,
      edge.color = "#00aeff50", edge.arrow.size = .2, vertex.label.color = "black")
 
-'''
 
 
 
@@ -255,7 +252,7 @@ triad_sub_all <- function(cohort = NULL, triad = NULL) {
 }
 
 # example
-g1_subgraphs <- triad_sub_all(group = g1, triad = 1)
+g1_subgraphs <- triad_sub_all(cohort = g1, triad = 1)
 
 
 
@@ -269,7 +266,7 @@ triad_edge_count <- function(cohort = NULL, triad = NULL) {
 }
 
 # example
-g1_edge_count <- triad_edge_count(group = g1, triad = 1)
+g1_edge_count <- triad_edge_count(cohort = g1, triad = 1)
 
 
 
@@ -339,7 +336,7 @@ triad_matrix <- function(cohort = NULL, triad = NULL) {
 
 
 # example
-g1_mat <- triad_matrix(cohort = g1, triad = 4)
+g1_mat <- triad_matrix(cohort = g1, triad = 3)
 
 
 
