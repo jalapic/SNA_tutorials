@@ -552,6 +552,21 @@ names(transition_list) <- c("20", "19d", "19c", "19b", "19a", "18d", "18c", "18b
 
 iso_order
 
+# in descending order of iso_names
+edge_count <- (rep(0, length(iso_names)))
+for (i in 1:length(iso_order)) {
+  for (j in 1:length(iso_names)) {
+    if (iso_order[[i]][1] != iso_order[[i]][2]) {
+      if (iso_order[[i]][1] == iso_names[j]){
+        edge_count[j] = edge_count[j] + 1
+      }
+      if (iso_order[[i]][2] == iso_names[j]){
+        edge_count[j] = edge_count[j] + 1
+      }
+    }
+  }
+}
+
 
 ### Make graph layout  - doesn't look good yet.
 ## Probably have to dictate exact location of nodes to make it look as we need.
@@ -577,15 +592,21 @@ dev.off()
 layout <- layout_with_dh(g)
 
 # Plot with customizations
+deg <- degree(g, mode="all")
+
 plot(
   g,
   layout = layout,
-  vertex.size = 30,
+  vertex.size = deg * 2,
   vertex.label.color = "black",
-  vertex.color = "orange",
+  vertex.label.cex = deg / 5,
+  # vertex.label.dist = 1.75,
+  vertex.label.degree = pi / 2,
+  vertex.color ="lightblue",
   vertex.frame.color = "black",     # Black border for nodes
   vertex.frame.width = 2,           # Thicker border for nodes
-  edge.color = "black",             # Darker edge color
+  edge.color = rgb(0, 0, 0, 0.5),             # Darker edge color
   edge.width = 1.5,                 # Thicker edges
   edge.arrow.size = 0.5             # Arrow size if directed
 )
+
