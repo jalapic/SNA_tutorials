@@ -263,7 +263,7 @@ for (i in 1:length(iso)) {
 
 
 iso_names <- vector()
-iso_num <- rep(list(1), 20)
+iso_num <- rep(list(1), 22)
 for (i in 1:length(iso)) {
   if (sum(all_trans == all_trans[i]) == 1) {
     iso_names <- append(iso_names, toString(all_trans[i]))
@@ -459,16 +459,45 @@ for (i in 1:nrow(iso_mat)) {
 iso_order <- unique(iso_order)
 not_iso_order <- unique(not_iso_order)
 
-
+iso_names <- sort(iso_names, TRUE)
 
 # empty transition matrix
-t_matrix <- matrix(0, nrow = length(new_mat[,1]), ncol = length(new_mat[,1]), 
+t_matrix <- matrix(NA, nrow = length(new_mat[,1]), ncol = length(new_mat[,1]), 
                    dimnames = list(sort(unlist(new_mat[,1]), decreasing = TRUE), sort(unlist(new_mat[,1]), decreasing = TRUE)))
 
-for (i in 1:length(not_iso_order)) {
-  t_matrix[not_iso_order[[i]][1], not_iso_order[[i]][2]] <- NA
-  t_matrix[not_iso_order[[i]][2], not_iso_order[[i]][1]] <- NA
+
+
+for (i in 1:length(iso_order)) {
+  t_matrix[iso_order[[i]][1], iso_order[[i]][2]] <- 0
+  t_matrix[iso_order[[i]][2], iso_order[[i]][1]] <- 0
 }
+
+
+
+
+
+# creates lists for which isomorphs turn into each other
+t_matrix_named <- matrix(NA, nrow = length(new_mat[,1]), ncol = length(new_mat[,1]), 
+                         dimnames = list(sort(unlist(new_mat[,1]), decreasing = TRUE), sort(unlist(new_mat[,1]), decreasing = TRUE)))
+
+for (i in 1:length(iso_order)) {
+  t_matrix_named[iso_order[[i]][1], iso_order[[i]][2]] <- iso_order[[i]][2]
+  t_matrix_named[iso_order[[i]][2], iso_order[[i]][1]] <- iso_order[[i]][1]
+}
+
+transition_list <- rep(list(), length(iso_names))
+
+for (i in 1:nrow(t_matrix_named)) {
+  transition_list[i] <- list(as.vector(t_matrix_named[i,]))
+  transition_list[[i]] <- transition_list[[i]][!is.na(transition_list[[i]])]
+}
+
+names(transition_list) <- c("20", "19d", "19c", "19b", "19a", "18d", "18c", "18b",
+                            "18a", "17b", "17a", "16c", "16b", "16a", "15d", "15c",
+                            "15b", "15a", "14", "13b", "13a", "12")
+
+
+
 
 
 

@@ -217,6 +217,7 @@ markov <- function(cohort) {
   t_matrix <- t_matrix / rowSums(t_matrix)
   t_matrix <- round(t_matrix, 2)
   
+  
   # makes NA if the state doesn't occur
   for (i in cohort_ids) {
     if (!(i %in% ids_of_cohort)) {
@@ -227,8 +228,9 @@ markov <- function(cohort) {
   
   for (j in 1:length(not_iso_order)) {
     t_matrix[not_iso_order[[j]][1], not_iso_order[[j]][2]] <- NA
-    t_matrix[not_iso_order[[j]][1], not_iso_order[[j]][2]] <- NA
+    t_matrix[not_iso_order[[j]][2], not_iso_order[[j]][1]] <- NA
   }
+  
   
   return(t_matrix)
 }
