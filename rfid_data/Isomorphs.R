@@ -548,3 +548,44 @@ names(transition_list) <- c("20", "19d", "19c", "19b", "19a", "18d", "18c", "18b
 # new_data <- read.csv("graphs6.csv",header=FALSE,sep=",")
 # i = 112
 # m <- matrix(as.vector(t(new_data[i,])),nrow=sqrt(length(as.vector(t(new_data[i,])))))
+
+
+iso_order
+
+
+### Make graph layout  - doesn't look good yet.
+## Probably have to dictate exact location of nodes to make it look as we need.
+
+# Load the igraph package
+library(igraph)
+
+
+# 1. Convert the list to an igraph object
+# Flatten the list and convert to an edge list matrix
+edge_list <- do.call(rbind, iso_order)
+g <- graph_from_edgelist(edge_list, directed = FALSE)
+
+# 2. Remove self-loops
+g <- simplify(g, remove.loops = TRUE, remove.multiple = FALSE)
+
+# 3. Plot the network
+dev.off()
+
+# Set a hierarchical layout (tree layout)
+#layout <- layout_in_circle(g)
+#layout <- layout_as_star(g)
+layout <- layout_with_dh(g)
+
+# Plot with customizations
+plot(
+  g,
+  layout = layout,
+  vertex.size = 30,
+  vertex.label.color = "black",
+  vertex.color = "orange",
+  vertex.frame.color = "black",     # Black border for nodes
+  vertex.frame.width = 2,           # Thicker border for nodes
+  edge.color = "black",             # Darker edge color
+  edge.width = 1.5,                 # Thicker edges
+  edge.arrow.size = 0.5             # Arrow size if directed
+)

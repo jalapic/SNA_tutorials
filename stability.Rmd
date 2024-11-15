@@ -1,0 +1,390 @@
+---
+title: "stability"
+output: html_document
+date: "2024-09-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Hierarchy Stability
+
+The central question is "***How stable are social relationships in hierarchical networks?***". (Hierarchical networks are mathematically social hierarchies). This question however is not particularly well defined. *What do we actually mean by "stable"? What do we mean by "social relationships"?*
+
+-   Do social relationships mean "ranks" or some measure of "dominance rating" or both?
+
+-   What is stability?
+
+    -   that ranks don't change?
+
+    -   that ratings don't change very much?
+
+    -   that ranks/ratings don't cross over?
+
+    -   that some other measure of relationships don't change (e.g. the directional consistency of individual relationships)
+
+    -   over what time frame are we talking about? Single events, over several events?
+
+    -   Are we only focused on the stability of individuals? What about the stability of the whole system? A network may be "stable" in the aggregate (i.e. network level) but individual positions could be "unstable".
+
+### **Current methods**
+
+The current method in the literature examines how 'stable' rankings are across time. This stability index was suggested by [Neumann et al 2011](http://www.eva.mpg.de/pks/staff/widdig/pdf/Neumann_et_al-2011_Assessing_dominance_hierarchie.pdf) and improved upon by [Mcdonald & Shizuka 2013](https://academic.oup.com/beheco/article/24/2/511/250731/Comparative-transitive-and-temporal-orderliness-in). (There may also be updates to this method since - I haven't searched the literature extensively yet). This essentially assesses how many ranking changes there have been across days between two time-points. It ranges between 0 and 1 with 1 indicating complete stability and 0 indicating complete instability in ranking.
+
+**Example Data**
+
+Let's look at cohort 10 from the RFID study. `value1` is the timestamp. `vector1` is the winner. `vector2` is the loser.
+
+```{r, message=FALSE, warning=FALSE}
+
+# Import Data and Order by Time
+library(tidyverse)
+c10 <- read_csv("rfid_data/cohort10.csv",
+   col_types = cols(vector1 = col_character(), 
+                    vector2 = col_character())) %>% 
+  arrange(value1)
+
+
+head(c10)
+
+```
+
+Let's first put the data into a sociomatrix:
+
+```{r, message=FALSE, warning=FALSE}
+
+library(compete) #get from GitHub
+
+c10$event <- 1:nrow(c10) # make event id
+c10$score <- 1 #make score column with 1 meaning 'winner'
+c10$vector1 <- as.numeric(c10$vector1) #make column numeric
+c10$vector2 <- as.numeric(c10$vector2) #make column numeric
+
+# organize winner loser column into a WL matrix
+mat <- get_wl_matrix(as.data.frame(c10[,4:5]))
+
+
+# best method for rating over whole period (aggregated data) is called ISI
+besto <- isi13(mat)$best_order
+mat2 <- mat[besto,besto]
+
+mat2
+get_di_matrix(mat2)
+
+
+```
+
+Next, we will make a glicko plot:
+
+```{r, message=FALSE, warning=FALSE}
+library(PlayerRatings)
+
+glick.df <- c10[, c(6,4,5,7)] #need event, actor, recipient, score
+gl <- glicko(glick.df, history=T, cval=2)
+gl
+```
+
+The idea behind this Stability Index is to examine how often lines cross in this plot per unit time:
+
+```{r, message=FALSE, warning=FALSE}
+plot(gl,npl=6)
+
+
+```
+
+The code below uses the `EloRating` package to calculate this Stability Index. I will evaluate stability across the whole period using the ELO method as the baseline for assessing ranks. There could be many modifications to this - we could use a different method for determining ratings on each day, we could use a different time-point for comparison (e.g. per hour), we could also change the constant in the ELO formula. There is also a 'weighting' factor in this algorithm that accounts for whether to penalize rank changes among higher ranked animals as more impactful on 'stability'. In the example below, I've used the default weighting factor, though the function of this weighting could be adjusted.
+
+The functions in the `EloRating` package appear to require timestamps to be in a Date format. So I am here converting the milliseconds to dates starting with Jan 1 2024, just for the sake of the example:
+
+```{r, message=FALSE, warning=FALSE}
+# Given milliseconds
+ms <- c10$value1
+
+# Convert milliseconds to seconds
+secs <- ms / 1000
+
+# Convert to POSIXct date-time
+date_time <- as.POSIXct(secs, origin = "2024-01-01", tz = "UTC")
+
+# Format to YYYY-MM-DD
+c10$f_date <- format(date_time, "%Y-%m-%d")
+
+
+```
+
+We use the functions `elo.seq` and `stab_elo` to calculate the Stability Index:
+
+```{r, message=FALSE, warning=FALSE}
+
+library(EloRating)
+
+SEQ <- EloRating::elo.seq(winner=c10$vector1, loser=c10$vector2, Date=c10$f_date, k=100, progressbar=FALSE) #note that could change k-factor here;  k=100 default
+
+SI <- EloRating::stab_elo(SEQ, from=min(SEQ$stability$date),to=max(SEQ$stability$date), weight=T)
+
+SI
+```
+
+This suggests that the stability index over these 10 days is 0.6377.
+
+### Literature Example of This Approach
+
+This index has been used in several papers and appears to have some utility. For example in [Ballesta et al. 2021 Primates "Assessing the reliability of an automated method for measuring dominance hierarchy in non-human primates"](https://link.springer.com/article/10.1007/s10329-021-00909-7) it is used to examine the stability of a group of primates before and after the removal of key group members.
+
+In the methods they describe the stability index formulation:
+
+![](img/stabilityindex.png)
+
+This is a figure that shows the changes in ranks following three removals of key individuals. In **b** it is possible to look at a smoothed sliding window stability index.
+
+![](img/stabilityindex2.png)
+
+There are probably several other studies that have used this approach that would be worth looking at.
+
+### Weaknesses of Current Approach
+
+There appears to be several weakness of the above approach:
+
+-   Unclear if the weighting of top-rated individuals is satisfactory here - would need to determine how to best weight for rank instability at top of hierarchy being more important.
+
+-   There is an "inertia" problem. It can take a while for dominance ratings to overtake each other. Animals may have switched dominant/subordinate relationships prior to being observable by a line crossing.
+
+-   All animals with Elo/Glicko ratings start with the same initial ratings which inherently suggests more variance and instability at the beginning of the housing. This may be true as animals determine ranks, but this does seem to be exaggerated. A solution may be to "back rate" animals - i.e. start them with ratings that are inferred from all the data - these better estimates would reduce line crosses (rank changes).
+
+-   This method also depends on which rating method is used for the y-axis. David's Scores, Glicko Ratings, Elo Ratings could be used (or others). Depending on the parameters used for the latter two, the 'stability' of the system could be artificially elevated/attenuated.
+
+-   It is not clear to me how well this system deals with changes in group composition.
+
+-   A possible advantage of this approach is that it gives one number for stability - but we should consider if that's what we really want? Perhaps we should be looking at how stability changes over time?
+
+**Potential other Methods**
+
+There could be other approaches that should be investigated.
+
+**A) Entropy Measures**. Some entropy measures may be an option. This essentially measures the diversity of ratings at each timepoint.
+
+Convert the glicko output into ratings at each timepoint:
+
+```{r, message=FALSE, warning=FALSE}
+gldf <- as.data.frame.table(gl$history)
+colnames(gldf) <- c("ID", "Timepoint", "Metric", "Value")
+gldf <- gldf %>% pivot_wider(names_from = Metric, values_from = Value)
+head(gldf)
+tail(gldf)
+```
+
+e.g. Measure the entropy of the distribution of ratings at each time point by using a kernel density estimation (KDE) approach. 1. **Estimate the density of the ratings** at each timepoint. 2. **Calculate the entropy** of the estimated density.
+
+```{r, message=FALSE, warning=FALSE}
+# Function to calculate Shannon entropy from a density estimate
+calculate_entropy <- function(ratings) {
+  # Estimate the density
+  density_est <- density(ratings)
+  
+  # Get the probability density function (pdf)
+  pdf <- density_est$y
+  
+  # Avoid log(0) by setting small values to a very small number
+  pdf <- pdf / sum(pdf)  # Normalize to sum to 1
+  pdf <- ifelse(pdf == 0, 1e-10, pdf)  # Replace 0s with a small value
+  
+  # Calculate entropy
+  entropy <- -sum(pdf * log2(pdf))
+  return(entropy)
+}
+
+# Calculate entropy for each timepoint
+entropy_results <- gldf %>%
+  group_by(Timepoint) %>%
+  summarise(entropy = calculate_entropy(Rating))
+
+# View the results
+plot(entropy_results$entropy)
+
+```
+
+I'm not 100% sure about the legitimacy of this approach? Also, we would need to consider if each event is the appropriate time unit to use. This method does suggest some change in stability around event 1600.... Perhaps worth assessing.
+
+**B) Estimating Changes in Slopes**.
+
+If we look at the Glicko graph again. Rather than examining line changes, perhaps looking at changes in the slope between two timepoints would be better?
+
+```{r, message=FALSE, warning=FALSE}
+plot(gl,npl=6)
+
+```
+
+For example, let's look at animal 1 between events 1400 and 1420. These are its ratings:
+
+```{r, message=FALSE, warning=FALSE}
+gldf$Timepoint <- as.numeric(as.character(gldf$Timepoint))
+gldf %>% filter(ID==1) %>% 
+  filter(Timepoint > 1400, Timepoint < 1420) %>% .$Rating
+
+```
+
+Here we see between the first two points that there is almost a 2 point change in ratings. However, it then doesn't change for 3 events. An issue with this method may be only individuals interacting at each timepoint have changes in their ratings (and therefore slopes). Perhaps if timepoints are aggregated (e.g. every N interactions) then this method may work better?). Another weakness of this approach are similar to those of the Stability Index in that it is affected by the type of dominance ratings chosen to use as well as the parameters used to determine rating change (i.e. the k or cval in the Glicko/Elo formula).
+
+**C) Rank Biased Overlap** **(RBO)**
+
+Another possibility that I have considered is looking at the correlation of ranks from timepoint to timepoint. Simple Spearman correlations could be used to do this, however, this doesn't allow for weighting of top ranked individuals. We care more about changes amongst top individuals. [RBO](http://blog.mobile.codalism.com/research/papers/wmz10_tois.pdf) allows for this.
+
+![](img/rbo.png)
+
+Example.... 1) Make a Rank Column for each timepoint
+
+```{r, message=FALSE, warning=FALSE}
+gldf <- gldf %>% group_by(Timepoint) %>% mutate(Rank = dense_rank(-Rating))
+tail(gldf)
+```
+
+Visualize change in Ranks as a BumpChart (This is a quick and dirty version- but does show the rank changes and when they occur). Notably some occur around the 1600 timepoint that the entropy measure suggested:
+
+```{r, message=FALSE, warning=FALSE}
+library(viridis) #for color scale
+library(ggbump)
+
+#refactor Team to be in rank order (same as order appears in dataset)
+gldf$ID <- factor(gldf$ID, levels = unique(gldf$ID))
+
+ggplot(gldf, aes(as.numeric(factor(Timepoint)), Rank, color = ID)) +
+  geom_bump(size=1)+
+  scale_y_reverse()+
+  xlab("Timepoint") +
+  ylab("Rank") +
+  theme_classic() +
+  theme(
+    axis.ticks.y = element_blank(),
+    axis.line.y = element_blank(),
+    axis.text.y = element_text(size = rel(1.5)),
+    legend.position = "none"
+  )
+```
+
+2)  This is a working RBO function (I think). For example, run the rbo correlation between ranks at timepoint 1300 and 1500 using p=0.95 as the top-weighting factor.
+
+```{r, message=FALSE, warning=FALSE}
+# Define the RBO function
+source("stability/rbo.R")
+
+a<-gldf[gldf$Timepoint==1300,]
+b<-gldf[gldf$Timepoint==1500,]
+
+# using Ranks
+ar <- as.numeric(a$Rank)
+names(ar)<- a$ID
+br <- as.numeric(b$Rank)
+names(br) <- b$ID
+ar
+br
+
+rbo(ar, br, p = 0.95)
+
+
+# using Ratings
+arr <- as.numeric(a$Rating)
+names(arr)<- a$ID
+brr <- as.numeric(b$Rating)
+names(brr) <- b$ID
+arr
+brr
+
+rbo(arr, brr, p = 0.95)
+
+```
+
+The function seems to convert ratings to ranks anyway.
+
+3)  Run a loop to calculate the correlation in Ranks between each adjacent pairs of timepoints:
+
+```{r, message=FALSE, warning=FALSE}
+results <- NULL
+bins <- seq(1,max(gldf$Timepoint),10) #look every 10 interactions
+
+
+for (i in seq_len(length(bins) - 1)){
+    
+a<-gldf[gldf$Timepoint==bins[i],]
+b<-gldf[gldf$Timepoint==bins[i+1],]
+
+# using Ratings
+arr <- as.numeric(a$Rating)
+names(arr)<- a$ID
+brr <- as.numeric(b$Rating)
+names(brr) <- b$ID
+
+results[[i]] <- rbo(arr, brr, p = 0.95)
+}
+
+plot(unlist(results), type="l")
+```
+
+For this particular group with six individuals As with several of these methods, this gives us a rolling output of the RBO value across time. Again we see some activity (as measured by drop in RBO correlation) around the 1600 interaction mark (depicted by 160 on this plot as we are doing every 10 interactions).
+
+**C) Network Based Approaches**
+
+I won't go into detail here with these methods. But essentially this would be to assess factors such as the ratio of transitive::intransitive triads in a network across time. As well as which of the triads change, how they change and how they change back.
+
+The simplest method would to be just to look at triangle transitivity across time (but there are many more involved methods). Just as an example, I will arbitrarily create a list of dataframes that are 20 interactions long across the entirety of the `c10` dataset:
+
+```{r, message=FALSE, warning=FALSE}
+c10l <- lapply(1:(nrow(c10) - 19), function(i) c10[i:(i + 19), ])
+
+```
+
+This code converts each set of 20 interactions into a win-loss matrix and then calculates the triangle transitivity (proportion of transitive::intransitive triads). e.g. for the 3rd element of the list which corresponds to interactions 3 to 22. A 1 here refers to the triangle transitivity being 1 which is fully hierarchical.
+
+```{r, message=FALSE, warning=FALSE}
+ttri(get_wl_matrix(as.data.frame(c10l[[3]][4:5])))$Pt
+```
+
+Running in a loop to do for all:
+
+```{r, message=FALSE, warning=FALSE}
+ttrires <- NULL
+
+for(i in 1:length(c10l)){
+ttrires[[i]] <- ttri(get_wl_matrix(as.data.frame(c10l[[i]][4:5])))$Pt
+}
+
+plot(unlist(ttrires), type="l")
+```
+
+We could potentially use something like this to detect change points or periods of intense activity in the network.
+
+If we smooth this a bit more and used a window of 50 interactions, we can see more instability. This graph identifies several possible places of instability.
+
+```{r, message=FALSE, warning=FALSE}
+c10l1 <- lapply(1:(nrow(c10) - 49), function(i) c10[i:(i + 49), ])
+
+ttrires1 <- NULL
+
+for(i in 1:length(c10l1)){
+ttrires1[[i]] <- ttri(get_wl_matrix(as.data.frame(c10l1[[i]][4:5])))$Pt
+}
+
+plot(unlist(ttrires1), type="l")
+```
+
+This is just one network based application that we can use. There will be others.
+
+### Data Sources
+
+There just aren't that many sources of data that have longitudinal interactions of contests such as our mice data. Here are some possible sources:
+
+-   [Franz paper on baboons](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4571707/)
+
+-   Potentially the [Ballesta et al. 2021 Primates](https://link.springer.com/article/10.1007/s10329-021-00909-7) paper although this is a lab experiment and unsure if it fits our purpose
+
+-   Other longitudinal studies of primates? Other animals? (need to look for datasets)
+
+-   Our RFID mice work (would be nice to apply any metrics we develop to periods of "instability" that we experimentally introduce e.g. alpha removals.
+
+-   Human data ? e.g. chess datasets (although this isn't a closed competition like animal dominance hierarchies - so difficult to really compare).
+
+-   **Simulated data** - this would be the best test where would artificially create contests between agents and then alter e.g. the dominance rating and win probability of certain individuals or make all contests random. We should be able to track changes in stability associated with these properties.
+
+-   **Permuted data** - we should see much less stability in permuted data than real data from our mouse datasets.
+
+### 
