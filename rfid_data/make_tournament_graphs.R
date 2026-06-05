@@ -1,8 +1,8 @@
 getwd()
 
 
-d <- readRDS("nodes6_g.RDS")
-df <- readRDS("nodes6_tournaments_df.RDS")
+d <- readRDS("rfid_data/nodes6_g.RDS")
+df <- readRDS("rfid_data/nodes6_tournaments_df.RDS")
 df
 
 d[[56]]
