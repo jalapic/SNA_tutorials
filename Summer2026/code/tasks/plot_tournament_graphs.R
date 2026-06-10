@@ -1,9 +1,11 @@
 # ------------------ plotting - this isn't great !!  ------------------
 
 plot_tournament_panel <- function(g, main = "") {
-  lay <- igraph::layout_in_circle(g)
   d <- igraph::degree(g, mode = "out")
-  plot(g, layout = lay,
+  ord <- order(d, decreasing = TRUE) # allows to organize nodes in decreasing order when plotted
+  lay <- igraph::layout_in_circle(g, order = ord)
+  lay_rotated <- cbind(lay[,2], lay[,1]) # rotates 90 degrees clockwise from top
+  plot(g, layout = lay_rotated,
        vertex.size = 22, vertex.color = "grey90",
        vertex.frame.color = "black",
        vertex.label = d, vertex.label.color = "black",
