@@ -1,6 +1,7 @@
 ### Loading in an example RFID dataset
 
 library(tidyverse)
+library(igraph)
 
 c7 <- read_csv("Summer2026/mouse_data/cohort7.csv")
 
@@ -52,18 +53,37 @@ cohort_lastints <- function(cohort = NULL) {
 # makes all cohorts just the last interactions
 
 
-c7 <- cohort_lastints(c7)   # this would be for the whole dataset
+results <- cohort_lastints(c7)   # this would be for the whole dataset
 
-nrow(c7)
+results <- tibble(results)
 
-cohort_lastints(c7[1:25,]) # creates last int. dataset for rows 1-25   
+nrow(results)
 
+# cohort_lastints(c7[1:25,]) # creates last int. dataset for rows 1-25
+results$results[25]
 
 # for example....
 
-results <- NULL
-for(i in 1:nrow(c7)) {
-  results [[i]] <- cohort_lastints(c7[1:i,])
-}
+# Loop through each nested tibble and convert it to a graph
+graphs <- lapply(results$results, function(df) {
+  graph_from_data_frame(df, directed = TRUE)
+})
 
+# Access your separate graphs by index
+graphs[[25]] # Graph from row 25
 
+graphs <- tibble(graphs)
+
+nrow(graphs)
+
+#is.igraph(
+graphs$graphs[[148]]
+#)
+
+classes <- NULL
+
+for(i in 25:nrow(graphs)) {
+  classes[i] <- check_isomorphism(graphs$graphs[[i]], d)
+  }
+
+classes
