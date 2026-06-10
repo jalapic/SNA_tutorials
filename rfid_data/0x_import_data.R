@@ -2,7 +2,7 @@
 
 library(tidyverse)
 
-c7 <- read_csv("rfid_data/cohort7.csv")
+c7 <- read_csv("Desktop/GitHub/CurleyResearch/SNA_tutorials/rfid_data/cohort7.csv")
 
 head(c7)
 

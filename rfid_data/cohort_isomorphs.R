@@ -70,34 +70,34 @@ colnames(cohort_iso_mat) <- c("ID", "Wins")
 
 
 # import
-c1 <- read_csv("rfid_data/cohort1.csv",
+c1 <- read_csv("Desktop/GitHub/CurleyResearch/SNA_tutorials/rfid_data/cohort1.csv",
                col_types = cols(vector1 = col_character(), 
                                 vector2 = col_character()))
-c2 <- read_csv("rfid_data/cohort2.csv",
+c2 <- read_csv("Desktop/GitHub/CurleyResearch/SNA_tutorials/rfid_data/cohort2.csv",
                col_types = cols(vector1 = col_character(), 
                                 vector2 = col_character()))
-c3 <- read_csv("rfid_data/cohort3.csv",
+c3 <- read_csv("Desktop/GitHub/CurleyResearch/SNA_tutorials/rfid_data/cohort3.csv",
                col_types = cols(vector1 = col_character(), 
                                 vector2 = col_character()))
-c4 <- read_csv("rfid_data/cohort4.csv",
+c4 <- read_csv("Desktop/GitHub/CurleyResearch/SNA_tutorials/rfid_data/cohort4.csv",
                col_types = cols(vector1 = col_character(), 
                                 vector2 = col_character()))
-c5 <- read_csv("rfid_data/cohort5.csv",
+c5 <- read_csv("Desktop/GitHub/CurleyResearch/SNA_tutorials/rfid_data/cohort5.csv",
                col_types = cols(vector1 = col_character(), 
                                 vector2 = col_character()))
-# c6 <- read_csv("rfid_data/cohort6.csv",
-# col_types = cols(vector1 = col_character(), 
-#                 vector2 = col_character()))
-c7 <- read_csv("rfid_data/cohort7.csv",
+# c6 <- read_csv("Desktop/GitHub/CurleyResearch/SNA_tutorials/rfid_data/cohort6.csv",
+               # col_types = cols(vector1 = col_character(), 
+                                # vector2 = col_character()))
+c7 <- read_csv("Desktop/GitHub/CurleyResearch/SNA_tutorials/rfid_data/cohort7.csv",
                col_types = cols(vector1 = col_character(), 
                                 vector2 = col_character()))
-c8 <- read_csv("rfid_data/cohort8.csv",
+c8 <- read_csv("Desktop/GitHub/CurleyResearch/SNA_tutorials/rfid_data/cohort8.csv",
                col_types = cols(vector1 = col_character(), 
                                 vector2 = col_character()))
-c9 <- read_csv("rfid_data/cohort9.csv",
+c9 <- read_csv("Desktop/GitHub/CurleyResearch/SNA_tutorials/rfid_data/cohort9.csv",
                col_types = cols(vector1 = col_character(), 
                                 vector2 = col_character()))
-c10 <- read_csv("rfid_data/cohort10.csv",
+c10 <- read_csv("Desktop/GitHub/CurleyResearch/SNA_tutorials/rfid_data/cohort10.csv",
                 col_types = cols(vector1 = col_character(), 
                                  vector2 = col_character()))
 

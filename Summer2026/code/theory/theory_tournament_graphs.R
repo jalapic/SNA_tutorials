@@ -2,7 +2,7 @@
 # Tournaments (n = 3..6)
 # ============================================================
 
-  library(igraph)
+library(igraph)
 
 # Avoid masked generics if these packages were attached earlier
 try(detach("package:sna", unload = TRUE), silent = TRUE)
@@ -63,18 +63,27 @@ get_score_sequence <- function(g) as.integer(sort(igraph::degree(g, mode = "out"
 count_triads <- function(g) {
   n <- igraph::vcount(g)
   if (n < 3) return(list(transitive_count = 0L, intransitive_count = 0L, intransitive_triads = list()))
+  
+  tc      <- igraph::triad_census(g)
+  trans   <- as.integer(tc[9])   # 030T = transitive triad
+  intrans <- as.integer(tc[10])  # 030C = cyclic triad
+  
+  # Loop only to record out-degree triples for each cyclic triad
   d <- igraph::degree(g, mode = "out")
   combos <- combn_list(n, 3)
-  trans <- 0L; intrans <- 0L
   triad_triples <- list(); pos <- 1L
+  
   for (idx in combos) {
     s <- igraph::induced_subgraph(g, idx)
+    if (igraph::triad_census(s)[10] == 1) {
+      triad_triples[[pos]] <- sort(as.integer(d[idx]))
+      pos <- pos + 1L
+    }
+    
+    
     cs <- igraph::triad_census(s)
     # igraph order: "030T" (transitive) index 9; "030C" (3-cycle) index 10
-    if (cs[9] == 1) {
-      trans <- trans + 1L
-    } else if (cs[10] == 1) {
-      intrans <- intrans + 1L
+    if (igraph::triad_census(s)[10] == 1) {
       triad_triples[[pos]] <- sort(as.integer(d[idx]))
       pos <- pos + 1L
     }
@@ -98,13 +107,7 @@ count_transitive_k <- function(g, k) {
 
 # Build a fixed canonical-key map for all unlabeled tournaments on 4 vertices
 build_four_vtx_key_map_fixed <- function() {
-  n <- 4; m <- n * (n - 1L) / 2L  # 6
-  keys <- character(0)
-  for (bits in 0:(2^m - 1L)) {
-    g <- make_tournament(n, bits)
-    keys <- c(keys, canon_key(g))
-  }
-  sort(unique(keys))  # (should be 4 distinct keys)
+  sort(vapply(enumerate_unlabeled_tournaments(4), canon_key, ""))  # 4 distinct keys
 }
 
 # Census of induced 4-node subtournaments by unlabeled type (aligned with fixed key map)
@@ -202,21 +205,12 @@ plot_all_classes <- function(reps) {
 # ------------------ isomorph lookup + transitions ------------------
 
 build_canon_index <- function(reps) {
-  keys <- vapply(reps, function(G) {
-    p  <- igraph::canonical_permutation(G)$labeling
-    gc <- igraph::permute(G, p)
-    M  <- igraph::as_adjacency_matrix(gc, sparse = FALSE)
-    paste(as.integer(M), collapse = "")
-  }, "")
+  keys <- vapply(reps, canon_key, "")
   structure(seq_along(reps), names = keys)
 }
 
 isomorph_class_id <- function(g, index_map) {
-  p  <- igraph::canonical_permutation(g)$labeling
-  gc <- igraph::permute(g, p)
-  M  <- igraph::as_adjacency_matrix(gc, sparse = FALSE)
-  key <- paste(as.integer(M), collapse = "")
-  unname(index_map[[key]])
+  unname(index_map[[canon_key(g)]])
 }
 
 generate_tournament_graph <- function(n = 6) {
