@@ -53,7 +53,7 @@ cohort_lastints <- function(cohort = NULL) {
 # makes all cohorts just the last interactions
 
 
-results <- cohort_lastints(c7)   # this would be for the whole dataset
+results <- cohort_lastints(c7)   # this should be for the whole dataset
 
 results <- tibble(results)
 
