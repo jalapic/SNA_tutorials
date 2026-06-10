@@ -28,7 +28,7 @@ generate_tournament_graph <- function(n = 6) {
   }
   
   # Create directed graph
-  g <- graph(edges, directed = TRUE)
+  g <- make_graph(edges, directed = TRUE)
   
   # Plot the graph
   plot(g, 
