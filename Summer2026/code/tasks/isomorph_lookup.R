@@ -3,7 +3,7 @@
 # get graph_list (isomorph dictionary)
 d <- readRDS("rfid_data/nodes6_g.RDS")
 
-# get g <- graph_from_edgelist(last_ints)
+# get g <- graph_from_data_frame(lastints)
 
 # Return the index or NA if no match found
 check_isomorphism <- function(g, graph_list) {
