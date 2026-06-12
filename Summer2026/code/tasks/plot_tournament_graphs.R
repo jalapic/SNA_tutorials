@@ -14,6 +14,8 @@ plot_tournament_panel <- function(g, main = "") {
 }
 
 plot_all_classes <- function(reps) {
+  score_seqs <- sapply(reps, function(g) paste(get_score_sequence(g), collapse = ","))
+  reps <- reps[order(score_seqs)]
   k <- length(reps)
   ncol <- ceiling(sqrt(k)); nrow <- ceiling(k / ncol)
   op <- par(mfrow = c(nrow, ncol), mar = c(0.7, 0.4, 0.7, 0.4)); on.exit(par(op))
