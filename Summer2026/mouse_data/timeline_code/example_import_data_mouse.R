@@ -1,7 +1,9 @@
-### Loading in an example RFID dataset
-
 library(tidyverse)
 library(igraph)
+library(hierformR)
+library(compete)
+
+### Loading in an example RFID dataset
 
 cohort <- read_csv("Summer2026/mouse_data/cohort7.csv")
 
@@ -21,20 +23,19 @@ table(cohort$vector2)
 # devtools::install_github('jalapic/compete')
 
 # this just shows that there is a hierarchy
-mat <- compete::get_wl_matrix(as.matrix(cohort[,4:5]))
-mat
-isi.res <- compete::isi13(mat)
-isi.res
-compete::get_di_matrix(mat)[isi.res$best_order,isi.res$best_order]
+#mat <- compete::get_wl_matrix(as.matrix(cohort[,4:5]))
+#mat
+#isi.res <- compete::isi13(mat)
+#isi.res
+#compete::get_di_matrix(mat)[isi.res$best_order,isi.res$best_order]
 
-head(cohort)
+#head(cohort)
 
 
 ### Get last interactions
 
 # devtools::install_github("jalapic/hierformR") 
-
-library(hierformR)
+#library(hierformR)
 
 # returns the last interactions between nodes
 cohort_lastints <- function(cohort = NULL) {
@@ -78,3 +79,19 @@ for(i in 25:nrow(graphs)) {
   }
 
 classes
+
+# turn list into dataframe and remove NA datapoints
+df_classes <- tibble(classes)
+
+View(df_classes)
+
+df_classes <- df_classes %>% filter(!is.na(classes))
+
+# graph timeline of network states
+ggplot(df_classes, aes(x = 1:nrow(df_classes), y = classes)) +
+  geom_point(size = .5) +
+  ggtitle('Cohort 7 Isomorph Timeline') +
+  xlab('Nth Interaction') +
+  ylab('Isomorph Number') +
+  theme_bw() +
+  scale_y_continuous(minor_breaks = seq(1, 56, by = 1))
