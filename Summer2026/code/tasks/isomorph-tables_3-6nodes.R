@@ -94,11 +94,12 @@ count_transitive_k <- function(g, k) {
 
 # ------------------ build dataframe  ------------------
 
-build_tournament_df <- function(reps) {
+build_tournament_df <- function(reps, include_4sets = TRUE, include_4census = TRUE) {
   # Score_ID mapping
   score_strings <- vapply(reps, function(g) paste(get_score_sequence(g), collapse = ","), "")
   uniq_scores <- sort(unique(score_strings))
   score_to_id <- setNames(seq_along(uniq_scores), uniq_scores)
+
   
   rows <- lapply(seq_along(reps), function(i) {
     G <- reps[[i]]
