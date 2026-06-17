@@ -84,6 +84,11 @@ TM4 <- create_transition_matrix(path_idx4, num_states = length(states4))
 
 print(TM4[1:4, 1:4])
 
+# converts row counts to decimals that add up to 1
+TM4 <- TM4 / rowSums(TM4)
+
+print(TM4[1:4, 1:4])
+
 # ------------------Random-walk transitions for n=5-----------------
 idx5 <- build_canon_index(reps5)
 path5 <- simulate_tournament_transitions(N = Nperms, reps = reps5, 
@@ -95,11 +100,21 @@ path_idx5 <- match(path5, states5)
 TM5 <- create_transition_matrix(path_idx5, num_states = length(states5))
 #TM5 <- create_transition_matrix(path, num_states = length(reps5))
 
-print(TM5[1:10, 1:10])
+print(TM5[1:12, 1:12])
+
+# converts row counts to decimals that add up to 1
+TM5 <- TM5 / rowSums(TM5)
+
+print(TM5[1:12, 1:12])
 
 # ------------------Random-walk transitions for n=6-----------------
 idx6 <- build_canon_index(reps6)
 path6 <- simulate_tournament_transitions(N = Nperms, reps = reps6, index_map = idx6)
-TM6 <- create_transition_matrix(path, num_states = length(reps6))
+TM6 <- create_transition_matrix(path6, num_states = length(reps6))
 
-print(TM6[1:10, 1:10])
+print(TM6[1:12, 1:12])
+
+# converts row counts to decimals that add up to 1
+TM6 <- TM6 / rowSums(TM6)
+
+print(TM6[1:12, 1:12])

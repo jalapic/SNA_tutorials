@@ -229,7 +229,6 @@ diameter(gx)
 
 
 
-
 library(ggplot2)
 library(reshape2)  # For melting matrix into long format
 
@@ -241,13 +240,13 @@ colnames(tmat_long) <- c("Row", "Column", "Value")
 ggplot(tmat_long, aes(x = Column, y = Row, fill = factor(Value))) +
   geom_tile(color = "black") +  # Add tile borders
   scale_fill_manual(values = c("#FFFFFF",  # 0 (White)
-                                        "#EAD8EC",  # 1 (Very Light Purple)
-                                        "#D4B9DA",  # 2 (Light Purple)
-                                        "#C994C7",  # 3 (Medium-Light Purple)
-                                        "#DF65B0",  # 4 (Medium Purple)
-                                        "#DD1C77",  # 5 (Dark Pinkish Purple)
-                                        "#980043",  # 6 (Deep Dark Purple)
-                                        "#67001F")  # 7 (Almost Black Purple)
+                               "#EAD8EC",  # 1 (Very Light Purple)
+                               "#D4B9DA",  # 2 (Light Purple)
+                               "#C994C7",  # 3 (Medium-Light Purple)
+                               "#DF65B0",  # 4 (Medium Purple)
+                               "#DD1C77",  # 5 (Dark Pinkish Purple)
+                               "#980043",  # 6 (Deep Dark Purple)
+                               "#67001F")  # 9 (Almost Black Purple)
   ) +
   labs(title = "56x56 Transition Matrix Heatmap",
        x = "Column",
