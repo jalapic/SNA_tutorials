@@ -4,7 +4,7 @@
 
 # steps
 # 1. download files
-# 2. make sure clock doesn't restart each day
+# 2. make sure clock doesn't restart each day 
 # 3. put into one big thing
 # 4. order data by milisecond time
 # 5. then we have our new csv
@@ -66,3 +66,40 @@ check_gaps(april29, "april29")
 check_gaps(april30, "april30")
 check_gaps(may1, "may1")
 check_gaps(may2, "may2")
+
+# simplified version for quick reference
+summarize_gaps <- function(df, name, threshold = 180000) {
+  df$datetimestamp <- as.POSIXct(gsub("(\\d{2}):(\\d{3})$", "\\1.\\2", df$datetimestamp),
+                                 format = "%d.%m.%Y %H:%M:%OS")
+  df <- df[order(df$datetimestamp), ]
+  gaps <- diff(as.numeric(df$datetimestamp) * 1000)
+  large_gaps <- which(gaps > threshold)
+  
+  if (length(large_gaps) == 0) {
+    cat(name, ": no large gaps found\n")
+  } else {
+    cat(name, ":", length(large_gaps), "gaps found\n")
+    for (i in large_gaps) {
+      t1 <- format(df$datetimestamp[i],   "%H:%M")
+      t2 <- format(df$datetimestamp[i+1], "%H:%M")
+      mins <- round(gaps[i] / 60000, 1)
+      cat(t1, "->", t2, "--", mins, "minute gap\n")
+    }
+  }
+}
+
+summarize_gaps(april18, "april18")
+summarize_gaps(april19, "april19")
+summarize_gaps(april20, "april20")
+summarize_gaps(april21, "april21")
+summarize_gaps(april22, "april22")
+summarize_gaps(april23, "april23")
+summarize_gaps(april24, "april24")
+summarize_gaps(april25, "april25")
+summarize_gaps(april26, "april26")
+summarize_gaps(april27, "april27")
+summarize_gaps(april28, "april28")
+summarize_gaps(april29, "april29")
+summarize_gaps(april30, "april30")
+summarize_gaps(may1, "may1")
+summarize_gaps(may2, "may2")
