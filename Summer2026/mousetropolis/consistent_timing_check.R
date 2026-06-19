@@ -32,5 +32,36 @@ april30 <- read.csv("Summer2026/mousetropolis/data/rawdata20260430.csv", sep = "
 may1 <- read.csv("Summer2026/mousetropolis/data/rawdata20260501.csv", sep = ";")
 may2 <- read.csv("Summer2026/mousetropolis/data/rawdata20260502.csv", sep = ";")
 
-# make sure clock doesn't start each day
+# making sure clock is tracking for entire time
+check_gaps <- function(df, name, threshold = 180000) {
+  df$datetimestamp <- as.POSIXct(df$datetimestamp, format = "%d.%m.%Y %H:%M:%S:%OS")
+  df <- df[order(df$datetimestamp), ]
+  gaps <- diff(as.numeric(df$datetimestamp) * 1000)
+  large_gaps <- which(gaps > threshold)
 
+  if (length(large_gaps) == 0) {
+    cat(name, ": no large gaps found\n")
+  } else {
+    cat(name, ":", length(large_gaps), "gaps found\n")
+    for(i in large_gaps) {
+      cat("Gap of", gaps[i], "ms between rows", i, "and", i+1, "\n")
+      print(df[c(i, i+1), ])
+    }
+  }
+}
+
+check_gaps(april18, "april18")
+check_gaps(april19, "april19")
+check_gaps(april20, "april20")
+check_gaps(april21, "april21")
+check_gaps(april22, "april22")
+check_gaps(april23, "april23")
+check_gaps(april24, "april24")
+check_gaps(april25, "april25")
+check_gaps(april26, "april26")
+check_gaps(april27, "april27")
+check_gaps(april28, "april28")
+check_gaps(april29, "april29")
+check_gaps(april30, "april30")
+check_gaps(may1, "may1")
+check_gaps(may2, "may2")
