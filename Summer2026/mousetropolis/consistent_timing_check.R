@@ -3,14 +3,14 @@
 # import data
 
 # steps
-# 1. download files
+# 1. download files DONE
 # 2. make sure clock doesn't restart each day 
 # 3. put into one big thing
-# 4. order data by milisecond time
+# 4. order data by millisecond time
 # 5. then we have our new csv
 # 6. look for our gaps (missing mice, jumping mice, missing antennas)
 # 7. identify transitions for each cage for each mouse
-# 8. determine which mice are following each other (within 250 miliseconds of each other)
+# 8. determine which mice are following each other (within 250 milliseconds of each other)
 
 # import libraries
 
@@ -66,6 +66,7 @@ check_gaps(april29, "april29")
 check_gaps(april30, "april30")
 check_gaps(may1, "may1")
 check_gaps(may2, "may2")
+check_gaps(all_data, "all_data")
 
 # simplified version for quick reference
 summarize_gaps <- function(df, name, threshold = 180000) {
@@ -103,3 +104,5 @@ summarize_gaps(april29, "april29")
 summarize_gaps(april30, "april30")
 summarize_gaps(may1, "may1")
 summarize_gaps(may2, "may2")
+summarize_gaps(all_data, "all_data")
+
