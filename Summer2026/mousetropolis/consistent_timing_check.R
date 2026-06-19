@@ -34,7 +34,8 @@ may2 <- read.csv("Summer2026/mousetropolis/data/rawdata20260502.csv", sep = ";")
 
 # making sure clock is tracking for entire time
 check_gaps <- function(df, name, threshold = 180000) {
-  df$datetimestamp <- as.POSIXct(df$datetimestamp, format = "%d.%m.%Y %H:%M:%S:%OS")
+  df$datetimestamp <- as.POSIXct(gsub("(\\d{2}):(\\d{3})$", "\\1.\\2", df$datetimestamp),
+                                  format = "%d.%m.%Y %H:%M:%OS")
   df <- df[order(df$datetimestamp), ]
   gaps <- diff(as.numeric(df$datetimestamp) * 1000)
   large_gaps <- which(gaps > threshold)
