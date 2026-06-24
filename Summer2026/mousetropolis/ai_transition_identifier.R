@@ -1,6 +1,7 @@
 library(dplyr)
 library(readr)
 library(igraph)
+library(lubridate)
 
 # uses the mousetropolis_labeled.jpeg image for box labels
 build_layout <- function() {
@@ -38,9 +39,8 @@ check_mouse_transitions <- function(file,
   events <- df %>%
     # ensure all data is of correct type
     dplyr::transmute(
-      cantimestamp = as.numeric(cantimestamp),
-      # might need to reformat this
-      datetimestamp = datetimestamp,
+      # cantimestamp = as.numeric(cantimestamp),
+      datetimestamp = as.POSIXct(datetimestamp, format = "%d.%m.%Y %H:%M:%S:%OS"),
       device_id = as.integer(deviceid),
       antenna_id = as.integer(antennaID),
       mouse_id = as.character(data)
@@ -51,7 +51,7 @@ check_mouse_transitions <- function(file,
     dplyr::group_by(mouse_id) %>%
     dplyr::mutate(
       # look to the next row
-      next_cantimestamp  = dplyr::lead(cantimestamp),
+      # next_cantimestamp  = dplyr::lead(cantimestamp),
       next_datetimestamp = dplyr::lead(datetimestamp),
       next_device_id     = dplyr::lead(device_id),
       next_antenna_id    = dplyr::lead(antenna_id),
