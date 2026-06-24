@@ -1,21 +1,6 @@
 # code to make sure the timing is consistent
 
 # import data
-
-# steps
-# 1. download files DONE
-# 2. make sure clock doesn't restart each day 
-# 3. put into one big thing DONE
-# 4. order data by millisecond time DONE
-# 5. then we have our new csv done
-# 6. look for our gaps (missing mice, jumping mice, missing antennas)
-# 7. identify transitions for each cage for each mouse
-# 8. determine which mice are following each other (within 250 milliseconds of each other)
-
-# import libraries
-
-
-# import data
 april18 <- read.csv("Summer2026/mousetropolis/data/rawdata20260418.csv", sep = ";")
 april19 <- read.csv("Summer2026/mousetropolis/data/rawdata20260419.csv", sep = ";")
 april20 <- read.csv("Summer2026/mousetropolis/data/rawdata20260420.csv", sep = ";")
@@ -31,6 +16,13 @@ april29 <- read.csv("Summer2026/mousetropolis/data/rawdata20260429.csv", sep = "
 april30 <- read.csv("Summer2026/mousetropolis/data/rawdata20260430.csv", sep = ";")
 may1 <- read.csv("Summer2026/mousetropolis/data/rawdata20260501.csv", sep = ";")
 may2 <- read.csv("Summer2026/mousetropolis/data/rawdata20260502.csv", sep = ";")
+
+# save all days as one csv
+all_data <- rbind(april18, april19, april20, april21, april22, april23, april24,
+                  april25, april26, april27, april28, april29, april30, may1, may2)
+
+write.csv(all_data, "Summer2026/mousetropolis/data/all_data.csv", row.names = FALSE)
+
 
 # making sure clock is tracking for entire time
 check_gaps <- function(df, name, threshold = 180000) {
