@@ -5,9 +5,9 @@
 # steps
 # 1. download files DONE
 # 2. make sure clock doesn't restart each day 
-# 3. put into one big thing
-# 4. order data by millisecond time
-# 5. then we have our new csv
+# 3. put into one big thing DONE
+# 4. order data by millisecond time DONE
+# 5. then we have our new csv done
 # 6. look for our gaps (missing mice, jumping mice, missing antennas)
 # 7. identify transitions for each cage for each mouse
 # 8. determine which mice are following each other (within 250 milliseconds of each other)
