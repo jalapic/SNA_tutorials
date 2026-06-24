@@ -29,22 +29,24 @@ build_layout <- function() {
 
 # function that outputs a table with each mouse's supposed transitions
 check_mouse_transitions <- function(file,
-                              layout = build_layout(),
+                              layout = build_layout() #,
                               # what is a permissible crossing time?
-                              max_cross_ms = 500000) {
+                              # max_cross_ms = NA
+                              ) {
   df <- readr::read_delim(file, delim = ";", show_col_types = FALSE)
   
   events <- df %>%
     # ensure all data is of correct type
     dplyr::transmute(
       cantimestamp = as.numeric(cantimestamp),
+      # might need to reformat this
       datetimestamp = datetimestamp,
       device_id = as.integer(deviceid),
       antenna_id = as.integer(antennaID),
       mouse_id = as.character(data)
     ) %>%
-    # order by mouse and time in milliseconds
-    dplyr::arrange(mouse_id, cantimestamp) %>%
+    # order by mouse and datetimestamp
+    dplyr::arrange(mouse_id, datetimestamp) %>%
     dplyr::left_join(layout, by = "device_id") %>%
     dplyr::group_by(mouse_id) %>%
     dplyr::mutate(
@@ -58,15 +60,16 @@ check_mouse_transitions <- function(file,
       next2_antenna_id = dplyr::lead(antenna_id, 2),
       
       # determine crossing time
-      dt_ms = next_cantimestamp - cantimestamp,
+      #dt_ms = next_cantimestamp - cantimestamp,
       
       # determine if current and next row make up a true transition
       candidate_transition =
-        !is.na(next_cantimestamp) &
+        !is.na(next_datetimestamp) &
         device_id == next_device_id &
-        antenna_id != next_antenna_id &
-        dt_ms >= 0 &
-        dt_ms <= max_cross_ms,
+        antenna_id != next_antenna_id #&
+        #dt_ms >= 0 &
+        #dt_ms <= max_cross_ms
+        ,
       
       verify_transition =
         candidate_transition &
@@ -94,9 +97,9 @@ check_mouse_transitions <- function(file,
     dplyr::filter(verify_transition, !is.na(from_box), !is.na(to_box)) %>%
     dplyr::transmute(
       mouse_id,
-      start_cantimestamp = cantimestamp,
-      end_cantimestamp   = next_cantimestamp,
-      cross_dt_ms = dt_ms,
+      #start_cantimestamp = cantimestamp,
+      #end_cantimestamp   = next_cantimestamp,
+      #cross_dt_ms = dt_ms,
       start_datetimestamp = datetimestamp,
       end_datetimestamp   = next_datetimestamp,
       device_id,
@@ -105,7 +108,7 @@ check_mouse_transitions <- function(file,
       from_box,
       to_box
     ) %>%
-    dplyr::arrange(mouse_id, start_cantimestamp)
+    dplyr::arrange(mouse_id, start_datetimestamp)
   
   crossings %>%
     dplyr::group_by(mouse_id) %>%
