@@ -5,7 +5,7 @@ library(igraph)
 # uses mousetropolis labeled image
 build_layout <- function() {
   tibble::tribble(
-    ~deviceid, ~antennaID, ~box_from, ~box_to,
+    ~device_id, ~antenna_id, ~box_from, ~box_to,
     
     1, 1, "FC1", "A",
     1, 2, "A",   "FC1",
@@ -65,8 +65,8 @@ build_layout <- function() {
 
 process_mouse_csv <- function(file,
                               layout = build_layout(),
-                              max_cross_ms = 5000) {
-  df <- readr::read_csv(file, show_col_types = FALSE)
+                              max_cross_ms = 500000) {
+  df <- readr::read_delim(file, delim = ";", show_col_types = FALSE)
   
   ev <- df %>%
     transmute(
@@ -86,38 +86,43 @@ process_mouse_csv <- function(file,
       next_box_from = lead(box_from),
       next_box_to = lead(box_to),
       dt_ms = next_cantimestamp - cantimestamp,
-      true_transition = device_id == next_device_id &
-        antenna_id != next_antenna_id &
-        !is.na(dt_ms) &
-        dt_ms >= 0 &
-        dt_ms <= max_cross_ms
+      true_transition = if_else(
+        device_id == next_device_id &
+          antenna_id != next_antenna_id &
+          !is.na(dt_ms) &
+          dt_ms >= 0 &
+          dt_ms <= max_cross_ms,
+        TRUE,
+        NA
+      )
     ) %>%
     ungroup()
-  
-  true_df <- ev %>%
-    filter(true_transition) %>%
-    select(cantimestamp, datetimestamp, mouse_id, device_id, antenna_id, box_from, box_to)
   
   g <- graph_from_data_frame(
     layout %>% distinct(box_from, box_to) %>% rename(from = box_from, to = box_to),
     directed = TRUE
   )
   
-  reachable <- function(from_box, to_box) {
-    is.finite(distances(g, v = from_box, to = to_box, mode = "out")[1, 1])
+  vertex_names <- V(g)$name
+  
+  reachable <- function(box_from, box_to) {
+    if (is.na(box_from) || is.na(box_to)) return(FALSE)
+    if (!(box_from %in% vertex_names)) return(FALSE)
+    if (!(box_to %in% vertex_names)) return(FALSE)
+    
+    is.finite(distances(g, v = box_from, to = box_to, mode = "out")[1, 1])
   }
   
-  true_df <- true_df %>%
-    group_by(mouse_id) %>%
+  ev %>%
     mutate(
-      next_box_from = lead(box_from),
       suspicious_jump = case_when(
         is.na(next_box_from) ~ FALSE,
         TRUE ~ !mapply(reachable, box_to, next_box_from)
       )
     ) %>%
-    ungroup() %>%
-    select(cantimestamp, datetimestamp, mouse_id, device_id, antenna_id, suspicious_jump)
-  
-  true_df
+    select(
+      cantimestamp, datetimestamp, mouse_id,
+      device_id, antenna_id, box_from, box_to,
+      next_box_from, true_transition, suspicious_jump
+    )
 }
