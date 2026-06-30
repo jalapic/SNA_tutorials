@@ -81,7 +81,7 @@ node_coords <- data.frame(
 # plot individual mouse movements
 plot_mouse_movements <- function(mouse_id) {
   mouse_moves <- all_true[all_true$mouse_id == mouse_id, ]
-  mouse_moves <- mouse_moves[order(mouse_moves$cantimestamp), ]
+  mouse_moves <- mouse_moves[order(as.POSIXct(mouse_moves$datetimestamp, format = "%d.%m.%Y %H:%M:%OS")), ]
   
   edge_counts <- mouse_moves %>%
     group_by(box_from, box_to) %>%
@@ -121,3 +121,98 @@ plot_mouse_movements("900263000641463")
 # "900263000641477" "900263000641478" "900263000641479" "900263000641480" "900263002586583"
 # "900263002586584" "900263002586586" "900263002586587" "900263002586588" "900263002586592"
 # "900263002586594" "900263002586597"
+
+
+## LOTS OF GRAPHS INCOMING ##
+# individual mouse plotting activity
+library(ggplot2)
+library(tidyr)
+
+# prep data once
+activity <- all_true %>%
+  mutate(
+    dt   = as.POSIXct(start_datetimestamp, format = "%d.%m.%Y %H:%M:%OS"),
+    hour = as.integer(format(dt, "%H")),
+    date = as.Date(dt)
+  ) %>%
+  group_by(mouse_id, date, hour) %>%
+  summarise(transitions = n(), .groups = "drop") %>%
+  complete(mouse_id, date, hour = 0:23, fill = list(transitions = 0))
+
+mouse_ids <- unique(activity$mouse_id)
+
+for (mid in mouse_ids) {
+  mouse_data <- activity %>% filter(mouse_id == mid)
+  
+  p <- ggplot(mouse_data, aes(x = hour, y = transitions)) +
+    geom_line(color = "steelblue") +
+    geom_point(size = 1.5, color = "steelblue") +
+    facet_wrap(~date, ncol = 3) +
+    scale_x_continuous(breaks = seq(0, 23, by = 3), labels = paste0(seq(0, 23, by = 3), "h")) +
+    labs(
+      title = paste("24hr Activity — Mouse", mid),
+      x = "Hour of Day",
+      y = "Transitions per Hour"
+    ) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+      strip.text = element_text(size = 8)
+    )
+  
+  print(p)
+}
+
+# stacked mice graphs with all mice colored
+
+dates <- unique(activity$date)
+
+for (d in dates) {
+  day_data <- activity %>% filter(date == d)
+  
+  p <- ggplot(day_data, aes(x = hour, y = transitions, color = factor(mouse_id), group = factor(mouse_id))) +
+    geom_line(alpha = 0.6) +
+    geom_point(size = 1.5, alpha = 0.6) +
+    scale_x_continuous(breaks = seq(0, 23, by = 3), labels = paste0(seq(0, 23, by = 3), "h")) +
+    labs(
+      title = paste("24hr Activity —", format(as.Date(d, origin = "1970-01-01"), "%B %d, %Y")),
+      x = "Hour of Day",
+      y = "Transitions per Hour",
+      color = "Mouse ID"
+    ) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7))
+  
+  print(p)
+}
+
+
+# stacked mice with most movement colored
+dates <- unique(activity$date)
+
+for (d in dates) {
+  day_data <- activity %>% 
+    filter(date == d) %>%
+    group_by(mouse_id) %>%
+    mutate(total = sum(transitions)) %>%
+    ungroup() %>%
+    mutate(top_mouse = mouse_id == mouse_id[which.max(total)])
+  
+  p <- ggplot(day_data, aes(x = hour, y = transitions, group = factor(mouse_id), color = top_mouse)) +
+    geom_line(alpha = 0.6) +
+    geom_point(size = 1.5, alpha = 0.6) +
+    scale_color_manual(values = c("TRUE" = "red", "FALSE" = "gray70"),
+                       labels = c("TRUE" = paste("Most active:", day_data$mouse_id[which.max(day_data$total)]),
+                                  "FALSE" = "Other mice")) +
+    scale_x_continuous(breaks = seq(0, 23, by = 3), labels = paste0(seq(0, 23, by = 3), "h")) +
+    labs(
+      title = paste("24hr Activity —", format(as.Date(d, origin = "1970-01-01"), "%B %d, %Y")),
+      x = "Hour of Day",
+      y = "Transitions per Hour",
+      color = ""
+    ) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7))
+  
+  print(p)
+}

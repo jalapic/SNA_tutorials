@@ -61,7 +61,7 @@ check_gaps(may2, "may2")
 check_gaps(all_data, "all_data")
 
 # simplified version for quick reference
-summarize_gaps <- function(df, name, threshold = 180000) {
+summarize_gaps <- function(df, name, threshold = 18000) {
   df$datetimestamp <- as.POSIXct(gsub("(\\d{2}):(\\d{3})$", "\\1.\\2", df$datetimestamp),
                                  format = "%d.%m.%Y %H:%M:%OS")
   df <- df[order(df$datetimestamp), ]

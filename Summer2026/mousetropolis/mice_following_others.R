@@ -33,6 +33,7 @@ write.csv(all_true, "Summer2026/mousetropolis/data/all_true.csv", row.names = FA
 # mice that follow within 250 milliseconds
 find_following <- function(df, window_ms = 250) {
   true_trans <- df
+  true_trans$ts_ms <- as.numeric(as.POSIXct(true_trans$start_datetimestamp, format = "%d.%m.%Y %H:%M:%OS")) * 1000
 
   results <- list()
 
@@ -40,15 +41,15 @@ find_following <- function(df, window_ms = 250) {
     mid   <- true_trans$mouse_id[i]
     bfrom <- true_trans$from_box[i]
     bto   <- true_trans$to_box[i]
-    ts    <- true_trans$start_cantimestamp[i]
+    ts    <- true_trans$ts_ms[i]
 
     # only find mice that passed AFTER this mouse (followers)
     matches <- true_trans[
       true_trans$mouse_id != mid &
       true_trans$from_box == bfrom &
       true_trans$to_box == bto &
-      true_trans$start_cantimestamp > ts &
-      true_trans$start_cantimestamp - ts <= window_ms, ]
+      true_trans$ts_ms > ts &
+      true_trans$ts_ms - ts <= window_ms, ]
 
     if (nrow(matches) > 0) {
       for (j in 1:nrow(matches)) {
@@ -58,8 +59,8 @@ find_following <- function(df, window_ms = 250) {
           from_box = bfrom,
           to_box = bto,
           time_leader = ts,
-          time_follower = matches$start_cantimestamp[j],
-          time_diff_ms = matches$start_cantimestamp[j] - ts
+          time_follower = matches$ts_ms[j],
+          time_diff_ms = matches$ts_ms[j] - ts
         )
       }
     }
