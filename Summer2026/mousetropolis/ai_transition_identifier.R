@@ -39,7 +39,6 @@ check_mouse_transitions <- function(file,
   events <- df %>%
     # ensure all data is of correct type
     dplyr::transmute(
-      # cantimestamp = as.numeric(cantimestamp),
       datetimestamp = as.POSIXct(datetimestamp, format = "%d.%m.%Y %H:%M:%S:%OS"),
       device_id = as.integer(deviceid),
       antenna_id = as.integer(antennaID),
@@ -51,7 +50,6 @@ check_mouse_transitions <- function(file,
     dplyr::group_by(mouse_id) %>%
     dplyr::mutate(
       # look to the next row
-      # next_cantimestamp  = dplyr::lead(cantimestamp),
       next_datetimestamp = dplyr::lead(datetimestamp),
       next_device_id     = dplyr::lead(device_id),
       next_antenna_id    = dplyr::lead(antenna_id),
@@ -60,7 +58,7 @@ check_mouse_transitions <- function(file,
       next2_antenna_id = dplyr::lead(antenna_id, 2),
       
       # determine crossing time
-      #dt_ms = next_cantimestamp - cantimestamp,
+      #dt_ms = next_datetimestamp - datetimestamp,
       
       # determine if current and next row make up a true transition
       candidate_transition =
@@ -97,8 +95,6 @@ check_mouse_transitions <- function(file,
     dplyr::filter(verify_transition, !is.na(from_box), !is.na(to_box)) %>%
     dplyr::transmute(
       mouse_id,
-      #start_cantimestamp = cantimestamp,
-      #end_cantimestamp   = next_cantimestamp,
       #cross_dt_ms = dt_ms,
       start_datetimestamp = datetimestamp,
       end_datetimestamp   = next_datetimestamp,
