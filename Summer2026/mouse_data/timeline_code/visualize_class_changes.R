@@ -1,7 +1,7 @@
 # load libraries
 library(tidyverse)
 
-# -------------------using new function----------------------
+# -------using function_isomorph_transitions.R------------
 c1 <- readr::read_csv("Summer2026/mouse_data/cohort1.csv")
 c2 <- readr::read_csv("Summer2026/mouse_data/cohort2.csv")
 c3 <- readr::read_csv("Summer2026/mouse_data/cohort3.csv")
