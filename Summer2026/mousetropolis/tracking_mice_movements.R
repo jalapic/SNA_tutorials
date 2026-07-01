@@ -135,6 +135,7 @@ activity <- all_true %>%
     hour = as.integer(format(dt, "%H")),
     date = as.Date(dt)
   ) %>%
+  filter(!(date == as.Date("2026-05-02") & hour >= 18)) %>%
   group_by(mouse_id, date, hour) %>%
   summarise(transitions = n(), .groups = "drop") %>%
   complete(mouse_id, date, hour = 0:23, fill = list(transitions = 0))
