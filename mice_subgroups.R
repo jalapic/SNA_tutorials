@@ -9,11 +9,9 @@ library(ggplot2)
 
 # ---- 1. load transition data -------------------------------------
 # produced by mice_following_others.R / ai_transition_identifier.R
-all_true <- read.csv("Summer2026/mousetropolis/data/all_true.csv",
-                      colClasses = c(mouse_id = "character"))
-
-all_true$start_datetimestamp <- as.POSIXct(all_true$start_datetimestamp, format = "%d.%m.%Y %H:%M:%OS")
-all_true$end_datetimestamp   <- as.POSIXct(all_true$end_datetimestamp,   format = "%d.%m.%Y %H:%M:%OS")
+# (mouse_id is already character and the timestamps are already POSIXct,
+# since saveRDS preserves R types exactly - no re-parsing needed here)
+all_true <- readRDS("Summer2026/mousetropolis/data/all_true_crossings.rds")
 
 # mouse 900133000459667 is a different tag batch and never co-occurs with
 # the rest of the cohort - drop it so it doesn't show up as a permanent

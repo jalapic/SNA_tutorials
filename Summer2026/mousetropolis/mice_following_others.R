@@ -28,7 +28,7 @@ all_files <- c(
 )
 
 all_true <- lapply(all_files, check_mouse_transitions) %>% bind_rows()
-write.csv(all_true, "Summer2026/mousetropolis/data/all_true.csv", row.names = FALSE)
+saveRDS(all_true, "Summer2026/mousetropolis/data/all_true_crossings.rds")
 
 # mice that follow within 250 milliseconds
 find_following <- function(df, window_ms = 250) {
@@ -73,4 +73,4 @@ find_following <- function(df, window_ms = 250) {
 following_pairs <- find_following(all_true)
 
 # save following pairs
-write.csv(following_pairs, "Summer2026/mousetropolis/data/following_pairs.csv", row.names = FALSE)
+saveRDS(following_pairs, "Summer2026/mousetropolis/data/following_pairs.rds")

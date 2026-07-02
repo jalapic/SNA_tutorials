@@ -17,11 +17,11 @@ april30 <- read.csv("Summer2026/mousetropolis/data/rawdata20260430.csv", sep = "
 may1 <- read.csv("Summer2026/mousetropolis/data/rawdata20260501.csv", sep = ";")
 may2 <- read.csv("Summer2026/mousetropolis/data/rawdata20260502.csv", sep = ";")
 
-# save all days as one csv
+# save all days as one file
 all_data <- rbind(april18, april19, april20, april21, april22, april23, april24,
                   april25, april26, april27, april28, april29, april30, may1, may2)
 
-write.csv(all_data, "Summer2026/mousetropolis/data/all_data.csv", row.names = FALSE)
+saveRDS(all_data, "Summer2026/mousetropolis/data/all_data.rds")
 
 
 # making sure clock is tracking for entire time
