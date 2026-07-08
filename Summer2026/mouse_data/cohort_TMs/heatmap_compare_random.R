@@ -31,9 +31,9 @@ for (i in 1:5) {
     geom_tile(color = "black") +  # Add tile borders
     scale_fill_gradient2(low = "darkcyan", mid = "white", high = "orangered") +
     labs(title = glue("Cohort {i} Differences from Random Walk"),
-         x = "Column",
-         y = "Row",
-         fill = "Value") +
+         x = "Next State",
+         y = "Current State",
+         fill = "Difference") +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1),
           panel.grid.major = element_blank(),
@@ -48,9 +48,9 @@ for (i in 6:9) {
     geom_tile(color = "black") +  # Add tile borders
     scale_fill_gradient2(low = "darkcyan", mid = "white", high = "orangered") +
     labs(title = glue("Cohort {i+1} Differences from Random Walk"),
-         x = "Column",
-         y = "Row",
-         fill = "Value") +
+         x = "Next State",
+         y = "Current State",
+         fill = "Difference") +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1),
           panel.grid.major = element_blank(),
