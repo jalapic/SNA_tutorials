@@ -74,3 +74,6 @@ following_pairs <- find_following(all_true)
 
 # save following pairs
 saveRDS(following_pairs, "Summer2026/mousetropolis/data/following_pairs.rds")
+
+d <- load("Summer2026/mousetropolis/data/following_pairs.RDS")
+d
