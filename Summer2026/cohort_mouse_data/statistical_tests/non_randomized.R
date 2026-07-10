@@ -29,22 +29,6 @@ make_tournament <- function(n, bits) {
   igraph::graph_from_adjacency_matrix(A, mode = "directed")
 }
 
-enumerate_unlabeled_tournaments <- function(n) {
-  m <- n * (n - 1L) / 2L
-  seen <- new.env(hash = TRUE, parent = emptyenv())
-  reps <- vector("list", 0L)
-  
-  for (bits in 0:(2^m - 1L)) {
-    g <- make_tournament(n, bits)
-    key <- canon_key(g)
-    if (!exists(key, envir = seen, inherits = FALSE)) {
-      assign(key, length(reps) + 1L, envir = seen)
-      reps[[length(reps) + 1L]] <- g
-    }
-  }
-  reps
-}
-
 build_canon_lookup <- function(n) {
   m <- n * (n - 1L) / 2L
   n_states_labeled <- 2^m
@@ -107,36 +91,20 @@ row_normalize <- function(TM) {
 }
 
 # ------------------------------------------------------------
-# Build once for n = 6
+# Build for n = 6 & repeat many simulations efficiently
 # ------------------------------------------------------------
 
 lookup6 <- build_canon_lookup(6)
-reps6 <- lookup6$reps
 n_states <- lookup6$n_unlabeled
 
 Nperms <- 10000
-path6 <- simulate_tournament_transitions_fast(N = Nperms, lookup = lookup6)
-
-TM6 <- create_transition_matrix_fast(path6, n_states)
-TM6_prob <- row_normalize(TM6)
-
-print(length(reps6))
-print(TM6[1:min(12, n_states), 1:min(12, n_states)])
-print(TM6_prob[1:min(12, n_states), 1:min(12, n_states)])
-
-# ------------------------------------------------------------
-# Repeat many simulations efficiently
-# ------------------------------------------------------------
-
 n_sim <- 1000
 
-tm_list <- vector("list", n_sim)
 tm_prob_list <- vector("list", n_sim)
 
 for (b in 1:n_sim) {
   path <- simulate_tournament_transitions_fast(N = Nperms, lookup = lookup6)
   TM <- create_transition_matrix_fast(path, n_states)
-  tm_list[[b]] <- TM
   tm_prob_list[[b]] <- row_normalize(TM)
 }
 
@@ -206,11 +174,11 @@ pval_maps <- list()
 for (i in 1:5) {
   pval_maps[[i]] <- ggplot(cpvals_long[[i]], aes(x = Current_State, y = Next_State, fill = P_Value)) +
     geom_tile(color = "black") +  # Add tile borders
-    scale_fill_gradient(low = "black", high = "white") +
+    scale_fill_gradient(low = "black", high = "white", limits = c(0, 1)) +
     labs(title = glue("Cohort {i} Cellwise P-Values"),
-         x = "Current_State",
-         y = "Next_State",
-         fill = "P_Value") +
+         x = "Current State",
+         y = "Next State",
+         fill = "P-Value") +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1),
           panel.grid.major = element_blank(),
@@ -223,11 +191,11 @@ for (i in 1:5) {
 for (i in 6:9) {
   pval_maps[[i]] <- ggplot(cpvals_long[[i]], aes(x = Current_State, y = Next_State, fill = P_Value)) +
     geom_tile(color = "black") +  # Add tile borders
-    scale_fill_gradient(low = "black", high = "white") +
+    scale_fill_gradient(low = "black", high = "white", limits = c(0, 1)) +
     labs(title = glue("Cohort {i+1} Cellwise P-Values"),
-         x = "Current_State",
-         y = "Next_State",
-         fill = "P_Value") +
+         x = "Current State",
+         y = "Next State",
+         fill = "P-Value") +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1),
           panel.grid.major = element_blank(),
