@@ -17,7 +17,7 @@ c_list <- list(c1, c2, c3, c4, c5, c7, c8, c9, c10)
 c_dfs <- vector("list", length(c_list))
 
 for (i in seq_along(c_list)) {
-  c_dfs[[i]] <- analyze_lastint_isoclass(c_list[[i]])
+  c_dfs[[i]] <- get_class_seq(c_list[[i]])
 }
 
 # -------------------cohort 1----------------------

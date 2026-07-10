@@ -5,7 +5,7 @@ library(hierformR)
 library(compete)
 
 # function - outputs a dataframe
-analyze_lastint_isoclass <- function(cohort, graph_file = "rfid_data/nodes6_g.RDS", start_row = 25) {
+get_class_seq <- function(cohort, graph_file = "rfid_data/nodes6_g.RDS", start_row = 25) {
   d <- readRDS(graph_file)
   
   check_isomorphism <- function(g, graph_list) {
