@@ -25,7 +25,7 @@ saveRDS(all_data, "Summer2026/mousetropolis/data/all_data.rds")
 
 
 # making sure clock is tracking for entire time
-check_gaps <- function(df, name, threshold = 9000000) {
+check_gaps <- function(df, name, threshold = 180000) {
   df$datetimestamp <- as.POSIXct(gsub("(\\d{2}):(\\d{3})$", "\\1.\\2", df$datetimestamp),
                                   format = "%d.%m.%Y %H:%M:%OS")
   df <- df[order(df$datetimestamp), ]

@@ -39,7 +39,7 @@ check_mouse_transitions <- function(file,
   events <- df %>%
     # ensure all data is of correct type
     dplyr::transmute(
-      datetimestamp = as.POSIXct(datetimestamp, format = "%d.%m.%Y %H:%M:%S:%OS"),
+      datetimestamp = as.POSIXct(datetimestamp, format = "%d.%m.%Y %H:%M:%S:%OS", tz = "America/Chicago"),
       device_id = as.integer(deviceid),
       antenna_id = as.integer(antennaID),
       mouse_id = as.character(data)

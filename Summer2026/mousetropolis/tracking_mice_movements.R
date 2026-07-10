@@ -69,7 +69,7 @@ library(dplyr)
 library(igraph)
 
 # load data
-all_true <- readRDS("Summer2026/mousetropolis/data/all_true.RDS")
+all_true <- readRDS("Summer2026/mousetropolis/data/all_true_crossings.rds")
 
 # node positions matching the physical layout
 node_coords <- data.frame(
@@ -81,17 +81,17 @@ node_coords <- data.frame(
 # plot individual mouse movements
 plot_mouse_movements <- function(mouse_id) {
   mouse_moves <- all_true[all_true$mouse_id == mouse_id, ]
-  mouse_moves <- mouse_moves[order(as.POSIXct(mouse_moves$datetimestamp, format = "%d.%m.%Y %H:%M:%OS")), ]
-  
+  mouse_moves <- mouse_moves[order(mouse_moves$start_datetimestamp), ]
+
   edge_counts <- mouse_moves %>%
-    group_by(box_from, box_to) %>%
+    group_by(from_box, to_box) %>%
     summarise(count = n(), .groups = "drop")
-  
+
   g <- graph_from_data_frame(edge_counts, directed = TRUE, vertices = node_coords)
   layout_mat <- as.matrix(node_coords[, c("x", "y")])
-  
+
   # count transitions per box
-  box_counts <- table(c(all_true$box_from, all_true$box_to))
+  box_counts <- table(c(all_true$from_box, all_true$to_box))
   box_counts <- box_counts[V(g)$name]
   box_counts[is.na(box_counts)] <- 0
   
@@ -133,7 +133,7 @@ activity <- all_true %>%
   mutate(
     dt   = as.POSIXct(start_datetimestamp, format = "%d.%m.%Y %H:%M:%OS"),
     hour = as.integer(format(dt, "%H")),
-    date = as.Date(dt)
+    date = as.Date(dt, tz = "America/Chicago")
   ) %>%
   filter(!(date == as.Date("2026-05-02") & hour >= 18)) %>%
   group_by(mouse_id, date, hour) %>%
