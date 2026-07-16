@@ -5,7 +5,7 @@ library(compete)
 
 ### Loading in an example RFID dataset
 
-cohort <- read_csv("Summer2026/mouse_data/cohort7.csv")
+cohort <- read_csv("Summer2026/cohort_mouse_data/cohort7.csv")
 
 head(cohort)
 
