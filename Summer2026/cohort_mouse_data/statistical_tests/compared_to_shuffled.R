@@ -1,13 +1,14 @@
 library(igraph)
-library(ggplot2)
+library(dplyr)
 library(reshape2)
+library(ggplot2)
 library(glue)
 
 set.seed(1)
 
-# ------------------------------------------------------------
-# One-time setup: unlabeled tournament representatives
-# ------------------------------------------------------------
+# ============================================================
+# 1. Canonical lookup for unlabeled tournaments (n = 6)
+# ============================================================
 
 canon_key <- function(g) {
   p <- igraph::canonical_permutation(g)$labeling
@@ -58,22 +59,67 @@ build_canon_lookup <- function(n) {
   )
 }
 
-# ------------------------------------------------------------
-# Fast simulation using bitmasks
-# ------------------------------------------------------------
+lookup6 <- build_canon_lookup(6)
+n_states <- lookup6$n_unlabeled
 
-simulate_tournament_transitions_fast <- function(N = 10000, lookup) {
-  state <- sample.int(lookup$n_labeled, 1L) - 1L
-  path <- integer(N + 1L)
+# ============================================================
+# 2. Bit index for dyads
+# ============================================================
+
+make_bit_index <- function(vnames) {
+  n <- length(vnames)
+  idx_mat <- matrix(NA_integer_, n, n, dimnames = list(vnames, vnames))
+  idx <- 0L
+  for (i in 1:(n - 1L)) {
+    for (j in (i + 1L):n) {
+      idx_mat[i, j] <- idx
+      idx_mat[j, i] <- idx
+      idx <- idx + 1L
+    }
+  }
+  idx_mat
+}
+
+# ============================================================
+# 3. Convert interaction sequence to path of tournament states
+# ============================================================
+
+interaction_sequence_to_path <- function(edgelist, vnames, lookup) {
+  n <- length(vnames)
+  stopifnot(n == 6)
+  
+  idx_mat <- make_bit_index(vnames)
+  state <- 0L
+  path <- integer(nrow(edgelist) + 1L)
   path[1] <- lookup$class_id[state + 1L]
   
-  for (t in 1:N) {
-    flip <- sample.int(lookup$m, 1L) - 1L
-    state <- bitwXor(state, bitwShiftL(1L, flip))
+  for (t in seq_len(nrow(edgelist))) {
+    winner <- as.character(edgelist[t, 1])
+    loser  <- as.character(edgelist[t, 2])
+    
+    i <- match(winner, vnames)
+    j <- match(loser, vnames)
+    
+    bit <- idx_mat[i, j]
+    a <- min(i, j)
+    b <- max(i, j)
+    
+    # bit = 1 means a -> b, bit = 0 means b -> a
+    if (i == a && j == b) {
+      state <- bitwOr(state, bitwShiftL(1L, bit))
+    } else {
+      state <- bitwAnd(state, bitwNot(bitwShiftL(1L, bit)))
+    }
+    
     path[t + 1L] <- lookup$class_id[state + 1L]
   }
+  
   path
 }
+
+# ============================================================
+# 4. Transition matrix utilities
+# ============================================================
 
 create_transition_matrix_fast <- function(sequence, num_states) {
   from <- sequence[-length(sequence)]
@@ -90,50 +136,66 @@ row_normalize <- function(TM) {
   P
 }
 
-# ------------------------------------------------------------
-# Build for n = 6 & repeat many simulations efficiently
-# ------------------------------------------------------------
+# ============================================================
+# 5. Null randomization: shuffle order + flip directions
+# ============================================================
 
-lookup6 <- build_canon_lookup(6)
-n_states <- lookup6$n_unlabeled
-
-Nperms <- 10000
-n_sim <- 1000
-
-# cohort <- readr::read_csv("Summer2026/cohort_mouse_data/cohortX.csv")
-
-cohort <- cohort %>%
-  dplyr::arrange(value1)
-
-edgelists <- hierformR::lastints(cohort[, 4:5])
-
-# tm_prob_list needs to be based on shuffled version of observed edgelist
-
-tm_prob_list <- vector("list", n_sim)
-
-for (b in 1:n_sim) {
-  path <- simulate_tournament_transitions_fast(N = Nperms, lookup = lookup6)
-  TM <- create_transition_matrix_fast(path, n_states)
-  tm_prob_list[[b]] <- row_normalize(TM)
+randomize_edgelist_dyad_preserving <- function(edgelist) {
+  pairs <- edgelist[, 1:2]
+  
+  # unordered dyads
+  dyads <- t(apply(pairs, 1, function(x) sort(as.character(x))))
+  dyads <- as.data.frame(dyads, stringsAsFactors = FALSE)
+  colnames(dyads) <- c("id1", "id2")
+  
+  # randomize direction within each dyad
+  flip <- sample(c(FALSE, TRUE), size = nrow(dyads), replace = TRUE)
+  rand_edges <- dyads
+  rand_edges[flip, c("id1", "id2")] <- rand_edges[flip, c("id2", "id1")]
+  
+  # shuffle event order
+  rand_edges <- rand_edges[sample.int(nrow(rand_edges)), , drop = FALSE]
+  rownames(rand_edges) <- NULL
+  
+  rand_edges
 }
 
-# ------------------------------------------------------------
-# Cellwise p-values
-# ------------------------------------------------------------
+# ============================================================
+# 6. Simulate null TM distribution from one cohort's edgelist
+# ============================================================
+
+simulate_tm_null_from_edgelist <- function(edgelist, lookup, n_sim = 1000) {
+  vnames <- sort(unique(c(as.character(edgelist[[1]]), as.character(edgelist[[2]]))))
+  
+  tm_prob_list <- vector("list", n_sim)
+  
+  for (b in seq_len(n_sim)) {
+    rand_edgelist <- randomize_edgelist_dyad_preserving(edgelist)
+    path <- interaction_sequence_to_path(rand_edgelist, vnames, lookup)
+    TM <- create_transition_matrix_fast(path, lookup$n_unlabeled)
+    tm_prob_list[[b]] <- row_normalize(TM)
+  }
+  
+  tm_prob_list
+}
+
+# ============================================================
+# 7. Cellwise p-values
+# ============================================================
 
 cellwise_pvals <- function(obs_TM, tm_prob_list, adjust = FALSE, p_adjust_method = "BH") {
   n_states <- nrow(obs_TM)
   n_sim <- length(tm_prob_list)
   
   sim_array <- array(NA_real_, dim = c(n_states, n_states, n_sim))
-  for (b in 1:n_sim) sim_array[, , b] <- tm_prob_list[[b]]
+  for (b in seq_len(n_sim)) sim_array[, , b] <- tm_prob_list[[b]]
   
   p_mat_right <- matrix(NA_real_, n_states, n_states)
   p_mat_left  <- matrix(NA_real_, n_states, n_states)
   p_mat_two   <- matrix(NA_real_, n_states, n_states)
   
-  for (i in 1:n_states) {
-    for (j in 1:n_states) {
+  for (i in seq_len(n_states)) {
+    for (j in seq_len(n_states)) {
       null_vals <- sim_array[i, j, ]
       obs_val <- obs_TM[i, j]
       
@@ -154,66 +216,98 @@ cellwise_pvals <- function(obs_TM, tm_prob_list, adjust = FALSE, p_adjust_method
   list(right = p_mat_right, left = p_mat_left, two_sided = p_mat_two)
 }
 
-# ------------------------------------------------------------
-# Create list of matrices with each cohort's p-values
-# ------------------------------------------------------------
+# ============================================================
+# 8. Example: one cohort
+# ============================================================
 
-cohort_pvals <- vector("list", length(full_TMs))
+# cohort <- readr::read_csv("Summer2026/cohort_mouse_data/cohortX.csv") %>%
+#   dplyr::arrange(value1)
 
-for (i in seq_along(full_TMs)) {
-  cohort_pvals[[i]] <- cellwise_pvals(obs_TM = full_TMs[[i]],
-                                      tm_prob_list = tm_prob_list)
-}
+obs_edgelist <- cohort[, 4:5]
+colnames(obs_edgelist) <- c("from", "to")
 
-# ------------------------------------------------------------
-# Visualize each cohorts' cellwise p-values
-# ------------------------------------------------------------
+vnames <- sort(unique(c(as.character(obs_edgelist$from), as.character(obs_edgelist$to))))
 
-# Convert matrices into long format for ggplot
-cpvals_long <- vector("list", length(cohort_pvals))
+# observed TM
+obs_path <- interaction_sequence_to_path(obs_edgelist, vnames, lookup6)
+obs_TM_counts <- create_transition_matrix_fast(obs_path, n_states)
+obs_TM_prob <- row_normalize(obs_TM_counts)
 
-for (i in seq_along(cohort_pvals)) {
-  cpvals_long[[i]] <- melt(cohort_pvals[[i]]$two_sided)
-  colnames(cpvals_long[[i]]) <- c("Current_State", "Next_State", "P_Value")
-}
+# null distribution
+tm_prob_list <- simulate_tm_null_from_edgelist(obs_edgelist, lookup6, n_sim = 1000)
 
-# Create heatmaps illustrating cellwise p-values
-pval_maps <- list()
+# p-values
+pvals <- cellwise_pvals(obs_TM = obs_TM_prob, tm_prob_list = tm_prob_list)
 
-for (i in 1:5) {
-  pval_maps[[i]] <- ggplot(cpvals_long[[i]], aes(x = Current_State, y = Next_State, fill = P_Value)) +
-    geom_tile(color = "black") +  # Add tile borders
-    scale_fill_gradient(low = "black", high = "white", limits = c(0, 1)) +
-    labs(title = glue("Cohort {i} Cellwise P-Values"),
-         x = "Current State",
-         y = "Next State",
-         fill = "P-Value") +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          legend.position = "right") +
-    scale_y_reverse(breaks=1:56) +
-    scale_x_continuous(breaks=1:56)
-}
+# heatmap
+pval_df <- reshape2::melt(pvals$two_sided)
+colnames(pval_df) <- c("Current_State", "Next_State", "P_Value")
 
-for (i in 6:9) {
-  pval_maps[[i]] <- ggplot(cpvals_long[[i]], aes(x = Current_State, y = Next_State, fill = P_Value)) +
-    geom_tile(color = "black") +  # Add tile borders
-    scale_fill_gradient(low = "black", high = "white", limits = c(0, 1)) +
-    labs(title = glue("Cohort {i+1} Cellwise P-Values"),
-         x = "Current State",
-         y = "Next State",
-         fill = "P-Value") +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          legend.position = "right") +
-    scale_y_reverse(breaks=1:56) +
-    scale_x_continuous(breaks=1:56)
-}
+ggplot(pval_df, aes(x = Current_State, y = Next_State, fill = P_Value)) +
+  geom_tile(color = "black") +
+  scale_fill_gradient(low = "black", high = "white", limits = c(0, 1)) +
+  labs(
+    title = "Cellwise P-Values (Dyad-Preserving Randomization)",
+    x = "Current State",
+    y = "Next State",
+    fill = "P-Value"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  scale_y_reverse(breaks = 1:n_states) +
+  scale_x_continuous(breaks = 1:n_states)
 
-for (i in seq_along(pval_maps)) {
-  print(pval_maps[[i]])
-}
+# ============================================================
+# 9. Loop over all cohorts (if you have full_TMs and cohorts)
+# ============================================================
+
+# Assuming:
+#   - full_TMs is a list of observed TMs (one per cohort)
+#   - cohort_list is a list of edgelists (one per cohort)
+
+# cohort_pvals <- vector("list", length(cohort_list))
+
+# for (i in seq_along(cohort_list)) {
+#   edgelist <- cohort_list[[i]][, 4:5]
+#   colnames(edgelist) <- c("from", "to")
+# 
+#   vnames <- sort(unique(c(as.character(edgelist$from), as.character(edgelist$to))))
+# 
+#   obs_path <- interaction_sequence_to_path(edgelist, vnames, lookup6)
+#   obs_TM_counts <- create_transition_matrix_fast(obs_path, n_states)
+#   obs_TM_prob <- row_normalize(obs_TM_counts)
+# 
+#   tm_prob_list <- simulate_tm_null_from_edgelist(edgelist, lookup6, n_sim = 1000)
+# 
+#   cohort_pvals[[i]] <- cellwise_pvals(obs_TM = obs_TM_prob, tm_prob_list = tm_prob_list)
+# }
+
+# Heatmaps for each cohort:
+# for (i in seq_along(cohort_pvals)) {
+#   pval_df <- reshape2::melt(cohort_pvals[[i]]$two_sided)
+#   colnames(pval_df) <- c("Current_State", "Next_State", "P_Value")
+# 
+#   p <- ggplot(pval_df, aes(x = Current_State, y = Next_State, fill = P_Value)) +
+#     geom_tile(color = "black") +
+#     scale_fill_gradient(low = "black", high = "white", limits = c(0, 1)) +
+#     labs(
+#       title = glue("Cohort {i} Cellwise P-Values"),
+#       x = "Current State",
+#       y = "Next State",
+#       fill = "P-Value"
+#     ) +
+#     theme_minimal() +
+#     theme(
+#       axis.text.x = element_text(angle = 90, hjust = 1),
+#       panel.grid.major = element_blank(),
+#       panel.grid.minor = element_blank()
+#     ) +
+#     scale_y_reverse(breaks = 1:n_states) +
+#     scale_x_continuous(breaks = 1:n_states)
+# 
+#   print(p)
+# }
