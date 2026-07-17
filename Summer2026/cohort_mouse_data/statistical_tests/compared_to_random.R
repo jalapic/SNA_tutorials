@@ -172,9 +172,10 @@ for (i in seq_along(cohort_pvals)) {
 pval_maps <- list()
 
 for (i in 1:5) {
-  pval_maps[[i]] <- ggplot(cpvals_long[[i]], aes(x = Current_State, y = Next_State, fill = P_Value)) +
-    geom_tile(color = "black") +  # Add tile borders
-    scale_fill_gradient(low = "black", high = "white", limits = c(0, 1)) +
+  pval_maps[[i]] <- ggplot(cpvals_long[[i]], aes(x = Current_State, y = Next_State, 
+                                                 fill = P_Value < 0.05)) +
+    geom_tile(color = "black") +
+    scale_fill_manual(values = c(`TRUE` = "black", `FALSE` = "white")) +
     labs(title = glue("Cohort {i} Cellwise P-Values"),
          x = "Current State",
          y = "Next State",
@@ -189,9 +190,10 @@ for (i in 1:5) {
 }
 
 for (i in 6:9) {
-  pval_maps[[i]] <- ggplot(cpvals_long[[i]], aes(x = Current_State, y = Next_State, fill = P_Value)) +
-    geom_tile(color = "black") +  # Add tile borders
-    scale_fill_gradient(low = "black", high = "white", limits = c(0, 1)) +
+  pval_maps[[i]] <- ggplot(cpvals_long[[i]], aes(x = Current_State, y = Next_State, 
+                                                 fill = P_Value < 0.05)) +
+    geom_tile(color = "black") +
+    scale_fill_manual(values = c(`TRUE` = "black", `FALSE` = "white")) +
     labs(title = glue("Cohort {i+1} Cellwise P-Values"),
          x = "Current State",
          y = "Next State",

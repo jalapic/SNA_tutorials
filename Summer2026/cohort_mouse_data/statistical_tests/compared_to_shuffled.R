@@ -220,8 +220,8 @@ cellwise_pvals <- function(obs_TM, tm_prob_list, adjust = FALSE, p_adjust_method
 # 8. Example: one cohort
 # ============================================================
 
-# cohort <- readr::read_csv("Summer2026/cohort_mouse_data/cohortX.csv") %>%
-#   dplyr::arrange(value1)
+cohort <- readr::read_csv("Summer2026/cohort_mouse_data/cohort1.csv") %>%
+   dplyr::arrange(value1)
 
 obs_edgelist <- cohort[, 4:5]
 colnames(obs_edgelist) <- c("from", "to")
@@ -243,9 +243,9 @@ pvals <- cellwise_pvals(obs_TM = obs_TM_prob, tm_prob_list = tm_prob_list)
 pval_df <- reshape2::melt(pvals$two_sided)
 colnames(pval_df) <- c("Current_State", "Next_State", "P_Value")
 
-ggplot(pval_df, aes(x = Current_State, y = Next_State, fill = P_Value)) +
+ggplot(pval_df, aes(x = Current_State, y = Next_State, fill = P_Value < 0.05)) +
   geom_tile(color = "black") +
-  scale_fill_gradient(low = "black", high = "white", limits = c(0, 1)) +
+  scale_fill_manual(values = c(`TRUE` = "black", `FALSE` = "white")) +
   labs(
     title = "Cellwise P-Values (Dyad-Preserving Randomization)",
     x = "Current State",
@@ -291,9 +291,9 @@ ggplot(pval_df, aes(x = Current_State, y = Next_State, fill = P_Value)) +
 #   pval_df <- reshape2::melt(cohort_pvals[[i]]$two_sided)
 #   colnames(pval_df) <- c("Current_State", "Next_State", "P_Value")
 # 
-#   p <- ggplot(pval_df, aes(x = Current_State, y = Next_State, fill = P_Value)) +
+#   p <- ggplot(pval_df, aes(x = Current_State, y = Next_State, fill = P_Value < 0.05)) +
 #     geom_tile(color = "black") +
-#     scale_fill_gradient(low = "black", high = "white", limits = c(0, 1)) +
+#     scale_fill_manual(values = c(`TRUE` = "black", `FALSE` = "white")) +
 #     labs(
 #       title = glue("Cohort {i} Cellwise P-Values"),
 #       x = "Current State",
