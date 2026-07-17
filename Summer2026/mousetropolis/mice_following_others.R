@@ -33,7 +33,7 @@ saveRDS(all_true, "Summer2026/mousetropolis/data/all_true_crossings.rds")
 # mice that follow within 250 milliseconds
 find_following <- function(df, window_ms = 250) {
   true_trans <- df
-  true_trans$ts_ms <- as.numeric(as.POSIXct(true_trans$start_datetimestamp, format = "%d.%m.%Y %H:%M:%OS")) * 1000
+  true_trans$ts_ms <- as.numeric(true_trans$start_datetimestamp) * 1000
 
   results <- list()
 
@@ -72,8 +72,15 @@ find_following <- function(df, window_ms = 250) {
 # find all following pairs
 following_pairs <- find_following(all_true)
 
+# human-readable versions of the epoch-millisecond timestamps
+following_pairs <- following_pairs %>%
+  mutate(
+    time_leader_readable   = as.POSIXct(time_leader / 1000, origin = "1970-01-01", tz = "America/Chicago"),
+    time_follower_readable = as.POSIXct(time_follower / 1000, origin = "1970-01-01", tz = "America/Chicago")
+  )
+
 # save following pairs
 saveRDS(following_pairs, "Summer2026/mousetropolis/data/following_pairs.rds")
 
-d <- load("Summer2026/mousetropolis/data/following_pairs.RDS")
+d <- readRDS("Summer2026/mousetropolis/data/following_pairs.rds")
 d
