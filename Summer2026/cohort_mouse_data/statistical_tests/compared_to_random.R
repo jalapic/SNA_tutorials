@@ -173,36 +173,51 @@ pval_maps <- list()
 
 for (i in 1:5) {
   pval_maps[[i]] <- ggplot(cpvals_long[[i]], aes(x = Current_State, y = Next_State, 
-                                                 fill = P_Value < 0.05)) +
+                                                 fill = P_Value)) +
     geom_tile(color = "black") +
-    scale_fill_manual(values = c(`TRUE` = "black", `FALSE` = "white")) +
+    scale_fill_gradientn(
+      colours = c("black", "white"),
+      values  = c(0, 1),
+      limits  = c(0, 0.05),
+      name    = "P-Value",
+      oob     = scales::squish,   # clamp values > 0.05 to 0.05
+    ) +
     labs(title = glue("Cohort {i} Cellwise P-Values"),
          x = "Current State",
-         y = "Next State",
-         fill = "P-Value") +
+         y = "Next State") +
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          legend.position = "right") +
-    scale_y_reverse(breaks=1:56) +
-    scale_x_continuous(breaks=1:56)
+    theme(
+      axis.text.x = element_text(angle = 90, hjust = 1),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      legend.position = "right"
+      ) +
+    scale_y_reverse(breaks = 1:56) +
+    scale_x_continuous(breaks = 1:56)
 }
 
 for (i in 6:9) {
   pval_maps[[i]] <- ggplot(cpvals_long[[i]], aes(x = Current_State, y = Next_State, 
-                                                 fill = P_Value < 0.05)) +
+                                                 fill = P_Value)) +
     geom_tile(color = "black") +
-    scale_fill_manual(values = c(`TRUE` = "black", `FALSE` = "white")) +
+    scale_fill_gradientn(
+      colours = c("black", "white"),
+      values  = c(0, 1),
+      limits  = c(0, 0.05),
+      name    = "P-Value",
+      oob     = scales::squish,   # clamp values > 0.05 to 0.05
+    ) +
     labs(title = glue("Cohort {i+1} Cellwise P-Values"),
          x = "Current State",
          y = "Next State",
          fill = "P-Value") +
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          legend.position = "right") +
+    theme(
+      axis.text.x = element_text(angle = 90, hjust = 1),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      legend.position = "right"
+    ) +
     scale_y_reverse(breaks=1:56) +
     scale_x_continuous(breaks=1:56)
 }

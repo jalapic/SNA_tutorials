@@ -1,14 +1,3 @@
-#-----------------function for making transition matrices-------------------
-make_TM <- function(df) {
-  x <- df[[1]]
-  states <- sort(unique(x))
-  m <- table(
-    factor(x[-length(x)], levels = states),
-    factor(x[-1], levels = states)
-  )
-  as.matrix(m)
-}
-
 # -------using function_isomorph_transitions.R------------
 c1 <- readr::read_csv("Summer2026/cohort_mouse_data/cohort1.csv")
 c2 <- readr::read_csv("Summer2026/cohort_mouse_data/cohort2.csv")
@@ -26,6 +15,17 @@ c_dfs <- vector("list", length(c_list))
 
 for (i in seq_along(c_list)) {
   c_dfs[[i]] <- get_class_seq(c_list[[i]])
+}
+
+#-----------------function for making transition matrices-------------------
+make_TM <- function(df) {
+  x <- df[[1]]
+  states <- sort(unique(x))
+  m <- table(
+    factor(x[-length(x)], levels = states),
+    factor(x[-1], levels = states)
+  )
+  as.matrix(m)
 }
 
 #-------------loop to make transition matrices for all cohorts--------------
