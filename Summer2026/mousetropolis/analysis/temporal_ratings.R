@@ -17,9 +17,9 @@ glick.df <- clean_pairs[, c(5,2,3,4)] #need event, actor, recipient, score
 gl <- glicko(glick.df, history=T, cval=2)
 gl
 
-plot(gl,npl=12)
+plot(gl,npl=16)
 
-# not sure which package this function is from bc it's not working
+# run compete_extra_copy.R in order to run this
 plotglicko(glick.df, cval=2, ylim1=1500, ylim2=3000, 
            thetitle="Glicko Ratings over Time", linewd=.5)
 
