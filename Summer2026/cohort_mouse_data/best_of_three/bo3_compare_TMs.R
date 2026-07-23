@@ -14,11 +14,11 @@ make_TM <- function(df) {
   as.matrix(m)
 }
 
-# loop to make transition matrices for all cohorts
-TM_list <- vector("list", length(clean_dfs))
+# loop to make transition matrices for all cohorts - uses bot_dfs
+TM_list <- vector("list", length(bot_dfs))
 
-for (i in seq_along(clean_dfs)) {
-  TM_list[[i]] <- make_TM(clean_dfs[[i]])
+for (i in seq_along(bot_dfs)) {
+  TM_list[[i]] <- make_TM(bot_dfs[[i]])
 }
 
 for (i in seq_along(TM_list)) {
@@ -72,7 +72,7 @@ for (i in 1:5) {
   heatmaps[[i]] <- ggplot(TM_diffs_long[[i]], aes(x = Column, y = Row, fill = Value)) +
     geom_tile(color = "black") +  # Add tile borders
     scale_fill_gradient2(low = "darkcyan", mid = "white", high = "orangered") +
-    labs(title = glue("Collapsed Cohort {i} Diff from Random Walk"),
+    labs(title = glue("Best of 3 Cohort {i} Diff from Random Walk"),
          x = "Next State",
          y = "Current State",
          fill = "Difference") +
@@ -89,7 +89,7 @@ for (i in 6:9) {
   heatmaps[[i]] <- ggplot(TM_diffs_long[[i]], aes(x = Column, y = Row, fill = Value)) +
     geom_tile(color = "black") +  # Add tile borders
     scale_fill_gradient2(low = "darkcyan", mid = "white", high = "orangered") +
-    labs(title = glue("Collapsed Cohort {i+1} Diff from Random Walk"),
+    labs(title = glue("Best of 3 Cohort {i+1} Diff from Random Walk"),
          x = "Next State",
          y = "Current State",
          fill = "Difference") +
