@@ -3,7 +3,10 @@ library(ggplot2)
 library(tidyr)
 library(lubridate)
 
-all_true <- readRDS("Summer2026/mousetropolis/data/all_true_crossings.rds")
+exclude_ids <- c(900133000459667, 900263002586581, 900263002586595)
+
+all_true <- readRDS("Summer2026/mousetropolis/data/all_true_crossings.rds") %>%
+  filter(!mouse_id %in% exclude_ids)
 
 # average daily activity per mouse
 daily_activity <- all_true %>%
@@ -43,6 +46,48 @@ for (mid in mouse_ids) {
   
   print(p)
 }
+
+# average daily activity - all mice
+p_all <- ggplot(daily_activity, aes(x = hour, y = avg_transitions, color = factor(mouse_id), group = mouse_id)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 1.2) +
+  scale_x_continuous(
+    breaks = seq(0, 23, by = 3),
+    labels = paste0(seq(0, 23, by = 3), "h")
+  ) +
+  labs(
+    title = "Average Daily Activity — All Mice",
+    x = "Hour of Day",
+    y = "Average Transitions per Day",
+    color = "Mouse ID"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7)
+  )
+
+print(p_all)
+
+p_wrap <- ggplot(daily_activity, aes(x = hour, y = avg_transitions)) +
+  geom_line(color = "steelblue", linewidth = 0.8) +
+  geom_point(size = 1.2, color = "steelblue") +
+  facet_wrap(~mouse_id) +
+  scale_x_continuous(
+    breaks = seq(0, 23, by = 3),
+    labels = paste0(seq(0, 23, by = 3), "h")
+  ) +
+  labs(
+    title = "Average Daily Activity Per Mouse",
+    x = "Hour of Day",
+    y = "Average Transitions per Day"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+    strip.text = element_text(size = 8)
+  )
+
+print(p_wrap)
 
 # average weekly activity per mouse
 weekly_pattern <- all_true %>%
