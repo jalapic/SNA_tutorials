@@ -27,7 +27,7 @@ head(wldf)
 wlmat <- get_wl_matrix(wldf)
 wlmat
 
-# heirarchy measures
+# hierarchy measures
 rshps(wlmat)
 
 # directional consistency
@@ -39,14 +39,14 @@ devries(wlmat)
 # plotting modified h
 devries(wlmat, plot=T)
 
-#triangular Transitivity
+# triangular transitivity
 ttri_test(wlmat)
 
 # David's score
 ds(wlmat)
 
-# plot david's score steepness
-plot(1:12, rev(sort(ds(wlmat))), "l",
+# plot David's score steepness
+plot(1:16, rev(sort(ds(wlmat))), "l",
      xlab = "Rank",
      ylab = "David's Score",
      main = "David's Scores by Rank")
