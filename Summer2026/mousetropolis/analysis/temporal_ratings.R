@@ -4,10 +4,19 @@ library(PlayerRatings)
 
 pairs <- readRDS('Summer2026/mousetropolis/data/following_pairs.RDS')
 
-clean_pairs <- pairs %>% 
+ids <- read.csv("Summer2026/mousetropolis/data/mousemetRD1_ids.csv", 
+                colClasses = c("character", "character"))
+
+pairs_temp <- pairs %>%
+  left_join(ids, by = c("leader" = "TagID")) %>%
+  rename(recipient_temp = TempID) %>%
+  left_join(ids, by = c("follower" = "TagID")) %>%
+  rename(actor_temp = TempID)
+
+clean_pairs <- pairs_temp %>% 
   select(datetime = time_leader_readable,
-         actor = follower,
-         recipient = leader)
+         actor = actor_temp,
+         recipient = recipient_temp)
 
 clean_pairs$score <- 1
 
@@ -27,7 +36,6 @@ ggplot(gl$ratings, aes(x=1:16, y=Rating)) +
   geom_point(size=2) + 
   scale_x_continuous(breaks=1:16, labels=gl$ratings$Player) +
   theme_classic() +
-  theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust=1)) +
   geom_errorbar(aes(ymin=Rating-Deviation, ymax=Rating+Deviation),
                 width=.2,                    
                 position=position_dodge(.9),

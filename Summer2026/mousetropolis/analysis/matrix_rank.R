@@ -4,10 +4,19 @@ library(data.table)
 
 pair_data <- readRDS('Summer2026/mousetropolis/data/following_pairs.RDS')
 
-datetime_pairs <- pair_data %>% 
+ids <- read.csv("Summer2026/mousetropolis/data/mousemetRD1_ids.csv", 
+                colClasses = c("character", "character", "numeric"))
+
+pairs_temp <- pair_data %>%
+  left_join(ids, by = c("leader" = "TagID")) %>%
+  rename(recipient_temp = NumID) %>%
+  left_join(ids, by = c("follower" = "TagID")) %>%
+  rename(actor_temp = NumID)
+
+datetime_pairs <- pairs_temp %>% 
   select(Timestamp = time_leader_readable,
-         Actor = follower,
-         Recipient = leader)
+         Actor = actor_temp,
+         Recipient = recipient_temp)
 
 pairs_exp <- expandrows(datetime_pairs)
 
@@ -16,6 +25,14 @@ wldf <- pairs_exp[score==1][, c(2,3), with = FALSE] #data.table indexing
 head(wldf)
 
 wlmat <- get_wl_matrix(wldf)
+wlmat
+
+# rename winner-loser matrix row-column labels
+id_map <- setNames(ids$TempID, ids$NumID)
+
+rownames(wlmat) <- id_map[as.character(rownames(wlmat))]
+colnames(wlmat) <- id_map[as.character(colnames(wlmat))]
+
 wlmat
 
 # organize matrix by David's Scores method
