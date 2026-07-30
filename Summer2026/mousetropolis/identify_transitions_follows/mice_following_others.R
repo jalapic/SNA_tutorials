@@ -6,7 +6,7 @@ library(readr)
 library(igraph)
 
 # source the transition identifier
-source("Summer2026/mousetropolis/ai_transition_identifier.R")
+source("Summer2026/mousetropolis/identify_transitions_follows/true_transition_identifier.R")
 
 # read and combine all days
 all_files <- c(
