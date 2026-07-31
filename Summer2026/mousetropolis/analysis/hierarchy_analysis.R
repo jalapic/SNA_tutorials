@@ -28,6 +28,18 @@ wlmat <- get_wl_matrix(wldf)
 wlmat
 
 # hierarchy measures
+compete::org_matrix(wlmat, method='ds')
+
+wlmat2<- wlmat
+rownames(wlmat2)<-colnames(wlmat2)<-LETTERS[1:16]
+wlmat2
+
+wlmat2b <- compete::get_di_matrix(wlmat2)
+wlmat2b
+org_matrix(wlmat2b, method='ds')
+
+isi98(wlmat2b)
+
 rshps(wlmat)
 
 # directional consistency
@@ -45,7 +57,7 @@ ttri_test(wlmat)
 # David's score
 ds(wlmat)
 
-# plot David's score steepness
+# plot david's score steepness
 plot(1:16, rev(sort(ds(wlmat))), "l",
      xlab = "Rank",
      ylab = "David's Score",
