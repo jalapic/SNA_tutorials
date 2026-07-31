@@ -4,19 +4,10 @@ library(PlayerRatings)
 
 pairs <- readRDS('Summer2026/mousetropolis/data/following_pairs.RDS')
 
-ids <- read.csv("Summer2026/mousetropolis/data/mousemetRD1_ids.csv", 
-                colClasses = c("character", "character"))
-
-pairs_temp <- pairs %>%
-  left_join(ids, by = c("leader" = "TagID")) %>%
-  rename(recipient_temp = TempID) %>%
-  left_join(ids, by = c("follower" = "TagID")) %>%
-  rename(actor_temp = TempID)
-
-clean_pairs <- pairs_temp %>% 
+clean_pairs <- pairs %>%
   select(datetime = time_leader_readable,
-         actor = actor_temp,
-         recipient = recipient_temp)
+         actor = follower,
+         recipient = leader)
 
 clean_pairs$score <- 1
 

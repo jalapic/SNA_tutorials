@@ -8,9 +8,9 @@ ids <- read.csv("Summer2026/mousetropolis/data/mousemetRD1_ids.csv",
                 colClasses = c("character", "character", "numeric"))
 
 pairs_temp <- pair_data %>%
-  left_join(ids, by = c("leader" = "TagID")) %>%
+  left_join(ids, by = c("leader" = "TempID")) %>%
   rename(recipient_temp = NumID) %>%
-  left_join(ids, by = c("follower" = "TagID")) %>%
+  left_join(ids, by = c("follower" = "TempID")) %>%
   rename(actor_temp = NumID)
 
 datetime_pairs <- pairs_temp %>% 

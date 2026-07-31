@@ -4,17 +4,14 @@ library(lubridate)
 library(purrr)
 
 df <- readRDS("Summer2026/mousetropolis/data/all_true_crossings.rds")
-id_key <- read.csv("Summer2026/mousetropolis/data/mousemetRD1_ids.csv", stringsAsFactors = FALSE) %>%
-  mutate(TagID = as.character(TagID))
 
 df2 <- df %>%
   mutate(
-    mouse_id = as.character(mouse_id),
+    TempID = as.character(mouse_id),
     start_datetimestamp = as.POSIXct(start_datetimestamp, tz = "UTC"),
     end_datetimestamp = as.POSIXct(end_datetimestamp, tz = "UTC")
   ) %>%
-  left_join(id_key, by = c("mouse_id" = "TagID")) %>%
-  filter(!is.na(TempID)) %>%
+  filter(TempID %in% LETTERS[1:16]) %>%   # drop stray tags not in mousemetRD1_ids.csv
   arrange(TempID, start_datetimestamp)
 
 sample_times <- seq(

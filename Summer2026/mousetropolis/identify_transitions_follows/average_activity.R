@@ -5,14 +5,9 @@ library(lubridate)
 
 exclude_ids <- c(900133000459667, 900263002586581, 900263002586595)
 
-all_true <- readRDS("Summer2026/mousetropolis/data/all_true_crossings.rds") %>% 
-  filter(!mouse_id %in% exclude_ids)
-
-ids <- read.csv("Summer2026/mousetropolis/data/mousemetRD1_ids.csv", 
-                colClasses = c("character", "character"))
-
-all_true <- all_true %>%
-  left_join(ids, by = c("mouse_id" = "TagID"))
+all_true <- readRDS("Summer2026/mousetropolis/data/all_true_crossings.rds") %>%
+  filter(!mouse_id %in% exclude_ids) %>%
+  rename(TempID = mouse_id)
 
 # average daily activity per mouse
 daily_activity <- all_true %>%

@@ -1,19 +1,19 @@
 # import data
-april18 <- read.csv("Summer2026/mousetropolis/data/rawdata20260418.csv", sep = ";")
-april19 <- read.csv("Summer2026/mousetropolis/data/rawdata20260419.csv", sep = ";")
-april20 <- read.csv("Summer2026/mousetropolis/data/rawdata20260420.csv", sep = ";")
-april21 <- read.csv("Summer2026/mousetropolis/data/rawdata20260421.csv", sep = ";")
-april22 <- read.csv("Summer2026/mousetropolis/data/rawdata20260422.csv", sep = ";")
-april23 <- read.csv("Summer2026/mousetropolis/data/rawdata20260423.csv", sep = ";")
-april24 <- read.csv("Summer2026/mousetropolis/data/rawdata20260424.csv", sep = ";")
-april25 <- read.csv("Summer2026/mousetropolis/data/rawdata20260425.csv", sep = ";")
-april26 <- read.csv("Summer2026/mousetropolis/data/rawdata20260426.csv", sep = ";")
-april27 <- read.csv("Summer2026/mousetropolis/data/rawdata20260427.csv", sep = ";")
-april28 <- read.csv("Summer2026/mousetropolis/data/rawdata20260428.csv", sep = ";")
-april29 <- read.csv("Summer2026/mousetropolis/data/rawdata20260429.csv", sep = ";")
-april30 <- read.csv("Summer2026/mousetropolis/data/rawdata20260430.csv", sep = ";")
-may1 <- read.csv("Summer2026/mousetropolis/data/rawdata20260501.csv", sep = ";")
-may2 <- read.csv("Summer2026/mousetropolis/data/rawdata20260502.csv", sep = ";")
+april18 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260418.csv", sep = ";")
+april19 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260419.csv", sep = ";")
+april20 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260420.csv", sep = ";")
+april21 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260421.csv", sep = ";")
+april22 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260422.csv", sep = ";")
+april23 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260423.csv", sep = ";")
+april24 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260424.csv", sep = ";")
+april25 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260425.csv", sep = ";")
+april26 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260426.csv", sep = ";")
+april27 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260427.csv", sep = ";")
+april28 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260428.csv", sep = ";")
+april29 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260429.csv", sep = ";")
+april30 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260430.csv", sep = ";")
+may1 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260501.csv", sep = ";")
+may2 <- read.csv("Summer2026/mousetropolis/data/cleaned/rawdata20260502.csv", sep = ";")
 
 track_movements <- function(df, mouse_id) {
   df$datetimestamp <- as.POSIXct(gsub("(\\d{2}):(\\d{3})$", "\\1.\\2", df$datetimestamp),
@@ -41,25 +41,25 @@ track_movements <- function(df, mouse_id) {
 all_data <- rbind(april18, april19, april20, april21, april22, april23, april24,
                   april25, april26, april27, april28, april29, april30, may1, may2)
 
-track_movements(all_data, 900133000459667)
-track_movements(all_data, 900263000641476)
-track_movements(all_data, 900263000641471)
-track_movements(all_data, 900263000641480)
-track_movements(all_data, 900263000641477)
-track_movements(all_data, 900263000641474)
-track_movements(all_data, 900263000641478)
-track_movements(all_data, 900263000641463)
-track_movements(all_data, 900263000641479)
-track_movements(all_data, 900263002586587)
-track_movements(all_data, 900263002586586)
-track_movements(all_data, 900263002586597)
-track_movements(all_data, 900263002586594)
-track_movements(all_data, 900263002586588)
-track_movements(all_data, 900263002586592)
-track_movements(all_data, 900263002586583)
-track_movements(all_data, 900263002586584)
-track_movements(all_data, 900263002586595)
-track_movements(all_data, 900263002586581)
+track_movements(all_data, "900133000459667")  # stray tag, not in mousemetRD1_ids.csv
+track_movements(all_data, "I")
+track_movements(all_data, "E")
+track_movements(all_data, "G")
+track_movements(all_data, "P")
+track_movements(all_data, "O")
+track_movements(all_data, "J")
+track_movements(all_data, "B")
+track_movements(all_data, "F")
+track_movements(all_data, "M")
+track_movements(all_data, "C")
+track_movements(all_data, "D")
+track_movements(all_data, "N")
+track_movements(all_data, "H")
+track_movements(all_data, "L")
+track_movements(all_data, "A")
+track_movements(all_data, "K")
+track_movements(all_data, "900263002586595")  # stray tag, not in mousemetRD1_ids.csv
+track_movements(all_data, "900263002586581")  # stray tag, not in mousemetRD1_ids.csv
 
 
 # visual representation of individual mouse movements
@@ -115,12 +115,9 @@ plot_mouse_movements <- function(mouse_id) {
        main = paste("Movements for mouse", mouse_id))
 }
 
-plot_mouse_movements("900263002586597")
+plot_mouse_movements("D")
 
-# "900133000459667" "900263000641463" "900263000641471" "900263000641474" "900263000641476"
-# "900263000641477" "900263000641478" "900263000641479" "900263000641480" "900263002586583"
-# "900263002586584" "900263002586586" "900263002586587" "900263002586588" "900263002586592"
-# "900263002586594" "900263002586597"
+# "900133000459667" "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P"
 
 
 ## LOTS OF GRAPHS INCOMING ##

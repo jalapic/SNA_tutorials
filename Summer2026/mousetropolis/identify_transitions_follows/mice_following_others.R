@@ -10,21 +10,21 @@ source("Summer2026/mousetropolis/identify_transitions_follows/true_transition_id
 
 # read and combine all days
 all_files <- c(
-  "Summer2026/mousetropolis/data/rawdata20260418.csv",
-  "Summer2026/mousetropolis/data/rawdata20260419.csv",
-  "Summer2026/mousetropolis/data/rawdata20260420.csv",
-  "Summer2026/mousetropolis/data/rawdata20260421.csv",
-  "Summer2026/mousetropolis/data/rawdata20260422.csv",
-  "Summer2026/mousetropolis/data/rawdata20260423.csv",
-  "Summer2026/mousetropolis/data/rawdata20260424.csv",
-  "Summer2026/mousetropolis/data/rawdata20260425.csv",
-  "Summer2026/mousetropolis/data/rawdata20260426.csv",
-  "Summer2026/mousetropolis/data/rawdata20260427.csv",
-  "Summer2026/mousetropolis/data/rawdata20260428.csv",
-  "Summer2026/mousetropolis/data/rawdata20260429.csv",
-  "Summer2026/mousetropolis/data/rawdata20260430.csv",
-  "Summer2026/mousetropolis/data/rawdata20260501.csv",
-  "Summer2026/mousetropolis/data/rawdata20260502.csv"
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260418.csv",
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260419.csv",
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260420.csv",
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260421.csv",
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260422.csv",
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260423.csv",
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260424.csv",
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260425.csv",
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260426.csv",
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260427.csv",
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260428.csv",
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260429.csv",
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260430.csv",
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260501.csv",
+  "Summer2026/mousetropolis/data/cleaned/rawdata20260502.csv"
 )
 
 all_true <- lapply(all_files, check_mouse_transitions) %>% bind_rows()
