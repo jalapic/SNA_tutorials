@@ -63,3 +63,35 @@ plot(1:16, rev(sort(ds(wlmat))), "l",
      ylab = "David's Score",
      main = "David's Scores by Rank")
 abline(h = 0, col = "red", lty = 3)
+
+# i&si
+isi.out <-  isi98(wlmat)
+
+# wins made by each animal
+despotism(wlmat)
+
+# Color Sociomatrix
+matrixplot(wlmat, mylevs=isi.out$best_order)
+
+# quickly visualizing the inconsistencies in the hierarchy
+matrixplot0(wlmat, mylevs=isi.out$best_order)
+
+# checking for inconsistencies
+contests(df1,"K","C")
+
+# network certainty
+library(Perc)
+obsmat <- as.conflictmat(wldf)
+DominanceProbability.obs <- conductance(obsmat, maxLength = 2)
+s.rank.obs <- simRankOrder(DominanceProbability.obs$p.hat, num = 10, kmax = 10)
+dfobs <- merge(individualDomProb(DominanceProbability.obs$p.hat), s.rank.obs$BestSimulatedRankOrder)
+plot(dfobs$ranking, dfobs$Mean,
+     xlab="Rank", ylab="Dominance Certainty")
+
+# GLIKO
+library(PlayerRatings)
+df1 <- df1[order(df1$Timestamp),] #ensure in date order
+df1$event <- 1:nrow(df1)
+glick.df <- df1[, c(11,2,4,10), with = FALSE] #need event, actor, recipient, score
+gl <- glicko(glick.df, history=T, cval=2)
+gl

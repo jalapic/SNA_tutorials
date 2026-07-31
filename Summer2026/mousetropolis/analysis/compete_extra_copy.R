@@ -5,16 +5,11 @@ expandrows <- function(df){
   
   
   temp <- cSplit(cSplit(cbind(id = 1:nrow(df), df),
-                        "Actor", ",", "long"), 
+                        "Actor", ",", "long"),
                  "Recipient", ",", "long")
-  
-  
-  ## Convert "Actor" and "Recipient" to numeric
-  SD <- c("Actor", "Recipient")
-  temp[, (SD) := lapply(.SD, as.numeric), .SDcols = SD]
-  
-  
-  ## Sort Actors and Recipients, and check for duplicates and any points where Actors equal Recipients  
+
+
+  ## Sort Actors and Recipients, and check for duplicates and any points where Actors equal Recipients
   temp[, toDrop := duplicated(
     paste(pmin(Actor, Recipient), pmax(Actor, Recipient))) |
       Actor == Recipient, by = id]
